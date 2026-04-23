@@ -11,9 +11,12 @@ const router = express.Router();
 
 router.post('/register', authValidators.register, handleValidationErrors, async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, address } = req.body;
+    const { name, password, role, phone, address } = req.body;
+    const email = String(req.body.email || '').trim().toLowerCase();
 
-    const existing = await User.findOne({ email, isDeleted: false });
+    const existing = await User.findOne()
+      .where('email').equals(email)
+      .where('isDeleted').equals(false);
     if (existing) {
       return res.status(409).json({ success: false, message: 'Email already in use' });
     }
@@ -34,8 +37,12 @@ router.post('/register', authValidators.register, handleValidationErrors, async 
 
 router.post('/login', authLimiter, authValidators.login, handleValidationErrors, async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email, isDeleted: false }).select('+password');
+    const password = req.body.password;
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const user = await User.findOne()
+      .where('email').equals(email)
+      .where('isDeleted').equals(false)
+      .select('+password');
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });

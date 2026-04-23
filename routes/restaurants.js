@@ -5,6 +5,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { commonValidators, handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -12,7 +13,7 @@ router.get('/', async (req, res, next) => {
     const filter = { isDeleted: false, averageRating: { $gte: Number(minRating) } };
 
     if (cuisine) filter.cuisine = { $in: [cuisine] };
-    if (city) filter['location.city'] = new RegExp(city, 'i');
+    if (city) filter['location.city'] = new RegExp(escapeRegex(String(city)), 'i');
 
     const restaurants = await Restaurant.find(filter).sort(sort).limit(100);
     res.json({ success: true, restaurants });

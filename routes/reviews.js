@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { body } = require('express-validator');
 const Review = require('../models/Review');
 const Restaurant = require('../models/Restaurant');
@@ -22,22 +23,28 @@ router.post('/restaurants/:id/reviews', authenticate, [
   body('comment').optional().isString().isLength({ max: 500 })
 ], handleValidationErrors, async (req, res, next) => {
   try {
-    const restaurant = await Restaurant.findOne({ _id: req.params.id, isDeleted: false });
+    const restaurantId = mongoose.Types.ObjectId.createFromHexString(String(req.params.id));
+    const restaurant = await Restaurant.findById(restaurantId).where('isDeleted').equals(false);
     if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
 
+    const userId = mongoose.Types.ObjectId.createFromHexString(String(req.user._id));
     const review = await Review.findOneAndUpdate(
-      { restaurant: restaurant._id, user: req.user._id },
+      { restaurant: restaurantId, user: userId },
       {
-        restaurant: restaurant._id,
-        user: req.user._id,
-        rating: req.body.rating,
-        comment: req.body.comment,
-        photos: req.body.photos || []
+        $set: {
+          rating: Number(req.body.rating),
+          comment: req.body.comment,
+          photos: Array.isArray(req.body.photos) ? req.body.photos : []
+        },
+        $setOnInsert: {
+          restaurant: restaurantId,
+          user: userId
+        }
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true }
     );
 
-    await recalculateRating(restaurant._id);
+    await recalculateRating(restaurantId);
     res.status(201).json({ success: true, review });
   } catch (error) {
     next(error);

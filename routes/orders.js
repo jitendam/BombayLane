@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { body } = require('express-validator');
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
@@ -15,11 +16,15 @@ router.post('/', authenticate, [
 ], handleValidationErrors, async (req, res, next) => {
   try {
     const { restaurantId, items, deliveryAddress } = req.body;
-    const restaurant = await Restaurant.findOne({ _id: restaurantId, isDeleted: false });
+    const restaurantObjectId = mongoose.Types.ObjectId.createFromHexString(String(restaurantId));
+    const restaurant = await Restaurant.findById(restaurantObjectId).where('isDeleted').equals(false);
     if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
 
-    const itemIds = items.map((item) => item.menuItemId);
-    const menuItems = await MenuItem.find({ _id: { $in: itemIds }, restaurant: restaurantId, isDeleted: false });
+    const itemObjectIds = items.map((item) => mongoose.Types.ObjectId.createFromHexString(String(item.menuItemId)));
+    const menuItems = await MenuItem.find()
+      .where('_id').in(itemObjectIds)
+      .where('restaurant').equals(restaurantObjectId)
+      .where('isDeleted').equals(false);
 
     const orderItems = items.map((item) => {
       const menuItem = menuItems.find((it) => String(it._id) === String(item.menuItemId));
@@ -39,7 +44,7 @@ router.post('/', authenticate, [
 
     const order = await Order.create({
       customer: req.user._id,
-      restaurant: restaurantId,
+      restaurant: restaurantObjectId,
       items: orderItems,
       subtotal,
       tax,
