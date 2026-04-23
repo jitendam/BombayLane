@@ -9,6 +9,17 @@
   --border: #e5e7eb;
 }
 
+[data-theme="dark"] {
+  --bg: #111827;
+  --surface: #1f2937;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --brand: #f97316;
+  --brand-dark: #ea580c;
+  --success: #4ade80;
+  --border: #374151;
+}
+
 * { box-sizing: border-box; }
 body {
   margin: 0;

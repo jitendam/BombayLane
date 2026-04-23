@@ -10,7 +10,22 @@ const configuredOrigins = (process.env.CORS_ORIGIN || '')
 const allowedOrigins = configuredOrigins.length ? configuredOrigins : defaultOrigins;
 
 const securityMiddleware = [
-  helmet(),
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https://picsum.photos"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"]
+      }
+    }
+  }),
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {

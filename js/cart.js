@@ -45,6 +45,7 @@ BombayLane.cart = {
     item.quantity = Math.max(1, quantity);
     writeCart(cart);
     this.updateCount();
+    this.render();
   },
   clear() {
     writeCart([]);

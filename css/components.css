@@ -41,6 +41,7 @@
   border-radius: .4rem;
   border: 1px solid var(--border);
 }
+.spinner {
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -48,4 +49,14 @@
   border-top-color: var(--brand);
   animation: spin 1s linear infinite;
   margin: 1rem auto;
+}
+.badge {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: var(--text);
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: capitalize;
 }
