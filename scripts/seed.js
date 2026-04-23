@@ -93,7 +93,7 @@ async function seed() {
     },
     {
       name: 'Street Bites',
-      description: "Mumbai street food favourites – vada pav, pav bhaji and more!",
+      description: "Mumbai street food favorites – vada pav, pav bhaji and more!",
       cuisine: ['Street Food'],
       owner: owner._id,
       location: { address: '5 FC Road, Shivaji Nagar', city: 'Pune' },
