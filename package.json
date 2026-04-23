@@ -1,1 +1,24 @@
-{\n  "name": "BombayLane",\n  "version": "1.0.0",\n  "scripts": {\n    "dev": "node server.js",\n    "client": "cd client && npm start"\n  },\n  "dependencies": {\n    "express": "^4.17.1",\n    "mongoose": "^5.11.15",\n    "jsonwebtoken": "^8.5.1",\n    "bcryptjs": "^2.4.3",\n    "axios": "^0.21.1",\n    "react": "^17.0.2"\n  }\n}
+{
+  "name": "bombaylane",
+  "version": "1.0.0",
+  "description": "BombayLane food ordering platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.8.4",
+    "morgan": "^1.10.0",
+    "multer": "^2.1.1"
+  }
+}

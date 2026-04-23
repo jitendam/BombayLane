@@ -1,53 +1,56 @@
-# BombayLane Food Ordering App
+# BombayLane Food Ordering Platform
 
-## Project Description
-BombayLane is a food ordering application that allows users to browse through a variety of restaurants, order food, and have it delivered right to their doorstep. The app is designed to provide a seamless and user-friendly experience while ensuring timely deliveries and customer satisfaction.
+BombayLane is a full-stack food ordering platform with secure authentication, restaurant/menu management, cart and checkout flows, order tracking, and review support.
 
-## Features
-- **User Registration & Login**: Users can create accounts and log in securely.
-- **Restaurant Listings**: Browse through a comprehensive list of available restaurants.
-- **Food Menu**: Detailed menus with prices for each restaurant.
-- **Order Tracking**: Real-time order tracking system to monitor your order status.
-- **Secure Payments**: Multiple payment options including credit/debit cards and digital wallets.
-- **User Reviews**: Users can rate and review restaurants based on their experiences.
-- **Delivery Management**: Efficient delivery management system to ensure timely deliveries.
+## Tech Stack
+- **Backend:** Node.js, Express, MongoDB/Mongoose
+- **Security:** Helmet, CORS, rate limiting, input validation, sanitization
+- **Frontend:** HTML, CSS, vanilla JavaScript (mobile-first responsive UI)
 
-## Installation Instructions
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/jitendamCreat/BombayLane.git
-   ```
-2. **Navigate to the project directory**:
-   ```bash
-   cd BombayLane
-   ```
-3. **Install dependencies**:
+## Quick Start
+1. Install dependencies:
    ```bash
    npm install
    ```
-4. **Set up environment variables**: Make sure to create a `.env` file with the appropriate configuration.
-5. **Run the application**:
+2. Copy environment template and configure secrets:
    ```bash
-   npm start
+   cp .env.example .env
+   ```
+3. Start server:
+   ```bash
+   npm run dev
    ```
 
-## Usage Guidelines
-- After installation, open your browser and go to `http://localhost:3000`.
-- Register for a new account or log in with an existing one.
-- Explore different restaurants and their menus.
-- Add items to your cart and proceed to checkout.
-- Track your order status in real-time until it arrives at your location.
+## API Overview
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `PUT /api/auth/profile`
+- `GET /api/restaurants`
+- `GET /api/restaurants/:id`
+- `POST /api/restaurants`
+- `PUT /api/restaurants/:id`
+- `DELETE /api/restaurants/:id`
+- `GET /api/restaurants/:id/menu`
+- `POST /api/restaurants/:id/menu`
+- `PUT /api/menu/:id`
+- `DELETE /api/menu/:id`
+- `POST /api/orders`
+- `GET /api/orders`
+- `GET /api/orders/:id`
+- `PUT /api/orders/:id/status`
+- `POST /api/restaurants/:id/reviews`
+- `GET /api/restaurants/:id/reviews`
+- `GET /api/search`
 
-## Contributing
-We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to the project.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-- Inspired by various food delivery apps and user feedback. 
-- Thanks to all the developers and contributors.
-
----
-
-**Last Updated**: 2026-04-14 10:34:55 UTC
+## Frontend Pages
+- `/index.html`
+- `/pages/restaurants.html`
+- `/pages/restaurant-detail.html`
+- `/pages/cart.html`
+- `/pages/checkout.html`
+- `/pages/profile.html`
+- `/pages/orders.html`
+- `/pages/auth.html`
+- `/admin/index.html`

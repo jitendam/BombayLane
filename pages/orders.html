@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders | BombayLane</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <main class="container">
+    <section class="card">
+      <h1>Order History</h1>
+      <ul id="orders-list" class="list"></ul>
+    </section>
+    <section class="card">
+      <h2>Live order tracking</h2>
+      <p>Current status: <strong id="order-status">-</strong></p>
+      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/orders.js"></script>
+  <script src="/js/main.js"></script>
+  <script>BombayLane.orders.loadHistory();</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart | BombayLane</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links"><a href="/pages/checkout.html">Checkout</a></nav>
+  </header>
+  <main class="container grid" style="grid-template-columns:2fr 1fr;">
+    <section>
+      <h1>Your Cart</h1>
+      <ul id="cart-items" class="list"></ul>
+      <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear cart</button>
+    </section>
+    <aside class="card" id="cart-summary"></aside>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

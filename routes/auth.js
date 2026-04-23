@@ -1,52 +1,86 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Assuming a User model is defined
+const bcrypt = require('bcryptjs');
+const { body } = require('express-validator');
+const User = require('../models/User');
+const { generateToken } = require('../utils/jwt');
+const { authenticate } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimit');
+const { authValidators, handleValidationErrors } = require('../middleware/validation');
+
 const router = express.Router();
 
-// Replace 'your_jwt_secret' with your actual secret key
-const JWT_SECRET = 'your_jwt_secret';
+router.post('/register', authValidators.register, handleValidationErrors, async (req, res, next) => {
+  try {
+    const { name, email, password, role, phone, address } = req.body;
 
-// User Registration
-router.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
+    const existing = await User.findOne({ email, isDeleted: false });
+    if (existing) {
+      return res.status(409).json({ success: false, message: 'Email already in use' });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await User.create({ name, email, password: hashedPassword, role, phone, address });
 
-    // Create new user
-    const user = new User({ username, email, password: hashedPassword });
-    await user.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
+    const token = generateToken({ id: user._id, role: user.role });
+    return res.status(201).json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
-// User Login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, authValidators.login, handleValidationErrors, async (req, res, next) => {
+  try {
     const { email, password } = req.body;
+    const user = await User.findOne({ email, isDeleted: false }).select('+password');
 
-    // Verify user
-    const user = await User.findOne({ email });
     if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Validate password
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-        return res.status(400).json({ message: 'Invalid credentials' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    
-    res.status(200).json({ token });
+    const token = generateToken({ id: user._id, role: user.role });
+    return res.json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/logout', authenticate, (_req, res) => res.json({ success: true, message: 'Logged out successfully' }));
+
+router.get('/me', authenticate, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
+router.put('/profile', authenticate, [
+  body('name').optional().trim().isLength({ min: 2 }),
+  body('phone').optional().isString(),
+  body('address').optional().isString()
+], handleValidationErrors, async (req, res, next) => {
+  try {
+    const updates = {
+      ...(req.body.name && { name: req.body.name }),
+      ...(req.body.phone && { phone: req.body.phone }),
+      ...(req.body.address && { address: req.body.address }),
+      ...(req.body.preferences && { preferences: req.body.preferences })
+    };
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true }).select('-password');
+    res.json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
