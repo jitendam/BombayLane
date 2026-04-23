@@ -49,7 +49,7 @@ BombayLane.orders = {
       const orders = result.orders || [];
 
       list.innerHTML = orders.length
-        ? orders.map((order) => `<li class="card"><div class="row"><strong>#${order._id.slice(-6)}</strong><span class="badge">${order.status}</span></div><p>Total: ₹${order.total}</p><button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${order._id}')">Reorder</button></li>`).join('')
+        ? orders.map((order) => `<li class="card"><div class="row"><strong>#${BombayLane.escapeHtml(order._id.slice(-6))}</strong><span class="badge">${BombayLane.escapeHtml(order.status)}</span></div><p>Total: ₹${Number(order.total || 0)}</p><button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${BombayLane.escapeAttr(order._id)}')">Reorder</button></li>`).join('')
         : '<li class="card">No orders yet.</li>';
     } catch (error) {
       BombayLane.notify(error.message);

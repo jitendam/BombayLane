@@ -59,7 +59,13 @@ BombayLane.cart = {
 
     const cart = readCart();
     list.innerHTML = cart.length
-      ? cart.map((item) => `<li class="card row"><div><strong>${item.name}</strong><p class="muted">₹${item.price} x ${item.quantity}</p></div><div class="row"><button class="btn btn-secondary" onclick="BombayLane.cart.updateQuantity('${item.id}', ${item.quantity - 1})">-</button><button class="btn btn-secondary" onclick="BombayLane.cart.updateQuantity('${item.id}', ${item.quantity + 1})">+</button><button class="btn" onclick="BombayLane.cart.remove('${item.id}')">Remove</button></div></li>`).join('')
+      ? cart.map((item) => {
+        const safeId = BombayLane.escapeAttr(item.id);
+        const safeName = BombayLane.escapeHtml(item.name);
+        const safePrice = Number(item.price || 0);
+        const safeQty = Number(item.quantity || 1);
+        return `<li class="card row"><div><strong>${safeName}</strong><p class="muted">₹${safePrice} x ${safeQty}</p></div><div class="row"><button class="btn btn-secondary" onclick="BombayLane.cart.updateQuantity('${safeId}', ${safeQty - 1})">-</button><button class="btn btn-secondary" onclick="BombayLane.cart.updateQuantity('${safeId}', ${safeQty + 1})">+</button><button class="btn" onclick="BombayLane.cart.remove('${safeId}')">Remove</button></div></li>`;
+      }).join('')
       : '<li class="card">Your cart is empty.</li>';
 
     if (summary) {

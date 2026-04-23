@@ -8,6 +8,9 @@ const { authenticate } = require('../middleware/auth');
 const { commonValidators, handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
+const TAX_RATE = Number(process.env.TAX_RATE || 0.05);
+const FREE_DELIVERY_THRESHOLD = Number(process.env.FREE_DELIVERY_THRESHOLD || 500);
+const BASE_DELIVERY_FEE = Number(process.env.BASE_DELIVERY_FEE || 40);
 
 router.post('/', authenticate, [
   body('restaurantId').isMongoId(),
@@ -38,8 +41,8 @@ router.post('/', authenticate, [
     });
 
     const subtotal = orderItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const tax = Number((subtotal * 0.05).toFixed(2));
-    const deliveryFee = subtotal >= 500 ? 0 : 40;
+    const tax = Number((subtotal * TAX_RATE).toFixed(2));
+    const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
     const total = subtotal + tax + deliveryFee;
 
     const order = await Order.create({

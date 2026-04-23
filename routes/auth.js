@@ -8,6 +8,7 @@ const { authLimiter } = require('../middleware/rateLimit');
 const { authValidators, handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
 router.post('/register', authValidators.register, handleValidationErrors, async (req, res, next) => {
   try {
@@ -21,7 +22,7 @@ router.post('/register', authValidators.register, handleValidationErrors, async 
       return res.status(409).json({ success: false, message: 'Email already in use' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const user = await User.create({ name, email, password: hashedPassword, role, phone, address });
 
     const token = generateToken({ id: user._id, role: user.role });
