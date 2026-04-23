@@ -1,13 +1,19 @@
 const express = require('express');
 const { body } = require('express-validator');
-const User = require('../models/User');
+const prisma = require('../lib/prisma');
 const { authenticate, authorize } = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
 
+const USER_SAFE_SELECT = {
+  id: true, name: true, email: true, role: true,
+  phone: true, address: true, preferences: true,
+  isDeleted: true, createdAt: true, updatedAt: true
+};
+
 router.get('/me', authenticate, async (req, res) => {
-  const user = await User.findById(req.user._id).select('-password');
+  const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: USER_SAFE_SELECT });
   res.json({ success: true, user });
 });
 
@@ -22,7 +28,7 @@ router.put('/me', authenticate, [
     if (typeof req.body.phone === 'string') updates.phone = req.body.phone;
     if (req.body.preferences && typeof req.body.preferences === 'object') updates.preferences = req.body.preferences;
 
-    const user = await User.findByIdAndUpdate(req.user._id, { $set: updates }, { new: true }).select('-password');
+    const user = await prisma.user.update({ where: { id: req.user.id }, data: updates, select: USER_SAFE_SELECT });
     res.json({ success: true, user });
   } catch (error) {
     next(error);
@@ -31,7 +37,12 @@ router.put('/me', authenticate, [
 
 router.get('/', authenticate, authorize('admin'), async (req, res, next) => {
   try {
-    const users = await User.find({ isDeleted: false }).select('-password').sort('-createdAt').limit(200);
+    const users = await prisma.user.findMany({
+      where: { isDeleted: false },
+      select: USER_SAFE_SELECT,
+      orderBy: { createdAt: 'desc' },
+      take: 200
+    });
     res.json({ success: true, users });
   } catch (error) {
     next(error);

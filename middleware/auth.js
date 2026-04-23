@@ -1,5 +1,11 @@
-const User = require('../models/User');
+const prisma = require('../lib/prisma');
 const { verifyToken } = require('../utils/jwt');
+
+const USER_SAFE_SELECT = {
+  id: true, name: true, email: true, role: true,
+  phone: true, address: true, preferences: true,
+  isDeleted: true, createdAt: true, updatedAt: true
+};
 
 const authenticate = async (req, res, next) => {
   try {
@@ -11,7 +17,7 @@ const authenticate = async (req, res, next) => {
     }
 
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await prisma.user.findUnique({ where: { id: decoded.id }, select: USER_SAFE_SELECT });
 
     if (!user || user.isDeleted) {
       return res.status(401).json({ success: false, message: 'Invalid token' });

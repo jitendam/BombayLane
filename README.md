@@ -3,11 +3,11 @@
 BombayLane is a full-stack food ordering platform with secure authentication, restaurant/menu management, cart and checkout flows, order tracking, and review support.
 
 ## Tech Stack
-- **Backend:** Node.js, Express, MongoDB/Mongoose
+- **Backend:** Node.js, Express, PostgreSQL (Supabase), Prisma ORM
 - **Security:** Helmet, CORS, rate limiting, input validation, sanitization
 - **Frontend:** HTML, CSS, vanilla JavaScript (mobile-first responsive UI)
 
-## Quick Start (Demo mode — no MongoDB required)
+## Quick Start (Demo mode — no database required)
 
 The fastest way to run the site for a demo uses an in-memory server that is pre-seeded with data and requires no database:
 
@@ -15,36 +15,65 @@ The fastest way to run the site for a demo uses an in-memory server that is pre-
    ```bash
    npm install
    ```
-2. Copy the environment template:
-   ```bash
-   cp .env.example .env
-   ```
-3. Start the demo server:
+2. Start the demo server:
    ```bash
    npm run demo
    ```
-4. Open **http://localhost:5000** in your browser.
+3. Open **http://localhost:5000** in your browser.
 
-## Quick Start (Production mode — requires MongoDB)
+## Quick Start (Production mode — Supabase + Prisma)
 
-1. Install dependencies and copy the environment template:
-   ```bash
-   npm install
-   cp .env.example .env
-   ```
-2. Start MongoDB locally (separate terminal):
-   ```bash
-   mongod
-   ```
-3. Seed the database:
-   ```bash
-   npm run seed
-   ```
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
-5. Open **http://localhost:5000** in your browser.
+### 1. Create a Supabase project
+
+1. Sign up at [supabase.com](https://supabase.com) and create a new project.
+2. Go to **Project Settings → Database → Connection string → URI** and copy the connection string.
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set `DATABASE_URL` to your Supabase connection string:
+
+```
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.xxxx.supabase.co:5432/postgres
+```
+
+### 3. Push schema to Supabase
+
+```bash
+npm run prisma:push
+```
+
+This creates all tables in your Supabase database. For production deployments use migrations instead:
+
+```bash
+npm run prisma:migrate     # create + apply a migration file
+```
+
+### 4. Seed the database
+
+```bash
+npm run seed
+```
+
+### 5. Start the server
+
+```bash
+npm run dev
+```
+
+Open **http://localhost:5000** in your browser.
+
+### Prisma utilities
+
+| Command | Description |
+|---|---|
+| `npm run prisma:generate` | Regenerate the Prisma client after schema changes |
+| `npm run prisma:push` | Push schema changes directly to the DB (dev) |
+| `npm run prisma:migrate` | Create a migration file and apply it (production) |
+| `npm run prisma:studio` | Open Prisma Studio (visual DB browser) |
 
 ## Demo Credentials
 

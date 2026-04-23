@@ -1,20 +1,18 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const { body } = require('express-validator');
-const Review = require('../models/Review');
-const Restaurant = require('../models/Restaurant');
+const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
 const { commonValidators, handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
 
 const recalculateRating = async (restaurantId) => {
-  const stats = await Review.aggregate([
-    { $match: { restaurant: restaurantId, isDeleted: false } },
-    { $group: { _id: '$restaurant', avg: { $avg: '$rating' } } }
-  ]);
-  const averageRating = stats[0]?.avg || 0;
-  await Restaurant.findByIdAndUpdate(restaurantId, { averageRating: Number(averageRating.toFixed(2)) });
+  const result = await prisma.review.aggregate({
+    where: { restaurantId, isDeleted: false },
+    _avg: { rating: true }
+  });
+  const averageRating = Number((result._avg.rating || 0).toFixed(2));
+  await prisma.restaurant.update({ where: { id: restaurantId }, data: { averageRating } });
 };
 
 router.post('/restaurants/:id/reviews', authenticate, [
@@ -23,26 +21,26 @@ router.post('/restaurants/:id/reviews', authenticate, [
   body('comment').optional().isString().isLength({ max: 500 })
 ], handleValidationErrors, async (req, res, next) => {
   try {
-    const restaurantId = mongoose.Types.ObjectId.createFromHexString(String(req.params.id));
-    const restaurant = await Restaurant.findById(restaurantId).where('isDeleted').equals(false);
+    const restaurantId = req.params.id;
+    const restaurant = await prisma.restaurant.findFirst({ where: { id: restaurantId, isDeleted: false } });
     if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
 
-    const userId = mongoose.Types.ObjectId.createFromHexString(String(req.user._id));
-    const review = await Review.findOneAndUpdate(
-      { restaurant: restaurantId, user: userId },
-      {
-        $set: {
-          rating: Number(req.body.rating),
-          comment: req.body.comment,
-          photos: Array.isArray(req.body.photos) ? req.body.photos : []
-        },
-        $setOnInsert: {
-          restaurant: restaurantId,
-          user: userId
-        }
+    const userId = req.user.id;
+    const review = await prisma.review.upsert({
+      where: { restaurantId_userId: { restaurantId, userId } },
+      update: {
+        rating: Number(req.body.rating),
+        comment: req.body.comment || null,
+        photos: Array.isArray(req.body.photos) ? req.body.photos : []
       },
-      { upsert: true, new: true }
-    );
+      create: {
+        restaurantId,
+        userId,
+        rating: Number(req.body.rating),
+        comment: req.body.comment || null,
+        photos: Array.isArray(req.body.photos) ? req.body.photos : []
+      }
+    });
 
     await recalculateRating(restaurantId);
     res.status(201).json({ success: true, review });
@@ -53,10 +51,11 @@ router.post('/restaurants/:id/reviews', authenticate, [
 
 router.get('/restaurants/:id/reviews', commonValidators.objectIdParam('id'), handleValidationErrors, async (req, res, next) => {
   try {
-    const reviews = await Review.find({ restaurant: req.params.id, isDeleted: false })
-      .populate('user', 'name')
-      .sort('-createdAt');
-
+    const reviews = await prisma.review.findMany({
+      where: { restaurantId: req.params.id, isDeleted: false },
+      include: { user: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' }
+    });
     res.json({ success: true, reviews });
   } catch (error) {
     next(error);

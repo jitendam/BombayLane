@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
 
-const connectDatabase = require('./config/database');
+const prisma = require('./lib/prisma');
 const securityMiddleware = require('./middleware/security');
 const sanitizeInputs = require('./middleware/sanitization');
 const { globalLimiter } = require('./middleware/rateLimit');
@@ -47,7 +47,7 @@ app.use(errorHandler);
 
 const startServer = async () => {
   try {
-    await connectDatabase();
+    await prisma.$connect();
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
@@ -57,6 +57,9 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+process.on('SIGINT', async () => { await prisma.$disconnect(); process.exit(0); });
+process.on('SIGTERM', async () => { await prisma.$disconnect(); process.exit(0); });
 
 if (require.main === module) {
   startServer();

@@ -1,9 +1,6 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const { body } = require('express-validator');
-const Order = require('../models/Order');
-const Restaurant = require('../models/Restaurant');
-const MenuItem = require('../models/MenuItem');
+const prisma = require('../lib/prisma');
 const { authenticate } = require('../middleware/auth');
 const { commonValidators, handleValidationErrors } = require('../middleware/validation');
 
@@ -13,27 +10,25 @@ const FREE_DELIVERY_THRESHOLD = Number(process.env.FREE_DELIVERY_THRESHOLD || 50
 const BASE_DELIVERY_FEE = Number(process.env.BASE_DELIVERY_FEE || 40);
 
 router.post('/', authenticate, [
-  body('restaurantId').isMongoId(),
+  body('restaurantId').isUUID(),
   body('items').isArray({ min: 1 }),
   body('deliveryAddress').isString().isLength({ min: 5 })
 ], handleValidationErrors, async (req, res, next) => {
   try {
     const { restaurantId, items, deliveryAddress } = req.body;
-    const restaurantObjectId = mongoose.Types.ObjectId.createFromHexString(String(restaurantId));
-    const restaurant = await Restaurant.findById(restaurantObjectId).where('isDeleted').equals(false);
+    const restaurant = await prisma.restaurant.findFirst({ where: { id: restaurantId, isDeleted: false } });
     if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
 
-    const itemObjectIds = items.map((item) => mongoose.Types.ObjectId.createFromHexString(String(item.menuItemId)));
-    const menuItems = await MenuItem.find()
-      .where('_id').in(itemObjectIds)
-      .where('restaurant').equals(restaurantObjectId)
-      .where('isDeleted').equals(false);
+    const itemIds = items.map((item) => String(item.menuItemId));
+    const menuItems = await prisma.menuItem.findMany({
+      where: { id: { in: itemIds }, restaurantId, isDeleted: false }
+    });
 
     const orderItems = items.map((item) => {
-      const menuItem = menuItems.find((it) => String(it._id) === String(item.menuItemId));
+      const menuItem = menuItems.find((it) => it.id === String(item.menuItemId));
       if (!menuItem) throw new Error('One or more menu items are invalid');
       return {
-        menuItem: menuItem._id,
+        menuItemId: menuItem.id,
         name: menuItem.name,
         quantity: Number(item.quantity || 1),
         price: menuItem.price
@@ -45,16 +40,19 @@ router.post('/', authenticate, [
     const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
     const total = subtotal + tax + deliveryFee;
 
-    const order = await Order.create({
-      customer: req.user._id,
-      restaurant: restaurantObjectId,
-      items: orderItems,
-      subtotal,
-      tax,
-      deliveryFee,
-      total,
-      deliveryAddress,
-      estimatedDeliveryAt: new Date(Date.now() + (restaurant.deliveryTimeMinutes || 30) * 60000)
+    const order = await prisma.order.create({
+      data: {
+        customerId: req.user.id,
+        restaurantId,
+        subtotal,
+        tax,
+        deliveryFee,
+        total,
+        deliveryAddress,
+        estimatedDeliveryAt: new Date(Date.now() + (restaurant.deliveryTimeMinutes || 30) * 60000),
+        items: { create: orderItems }
+      },
+      include: { items: true }
     });
 
     res.status(201).json({ success: true, order });
@@ -65,8 +63,9 @@ router.post('/', authenticate, [
 
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const filter = req.user.role === 'customer' ? { customer: req.user._id } : {};
-    const orders = await Order.find({ ...filter, isDeleted: false }).sort('-createdAt');
+    const where = { isDeleted: false };
+    if (req.user.role === 'customer') where.customerId = req.user.id;
+    const orders = await prisma.order.findMany({ where, include: { items: true }, orderBy: { createdAt: 'desc' } });
     res.json({ success: true, orders });
   } catch (error) {
     next(error);
@@ -75,11 +74,17 @@ router.get('/', authenticate, async (req, res, next) => {
 
 router.get('/:id', authenticate, commonValidators.objectIdParam('id'), handleValidationErrors, async (req, res, next) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, isDeleted: false }).populate('restaurant', 'name owner');
+    const order = await prisma.order.findFirst({
+      where: { id: req.params.id, isDeleted: false },
+      include: {
+        items: true,
+        restaurant: { select: { id: true, name: true, ownerId: true } }
+      }
+    });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-    const isCustomer = String(order.customer) === String(req.user._id);
-    const isOwner = order.restaurant && String(order.restaurant.owner) === String(req.user._id);
+    const isCustomer = order.customerId === req.user.id;
+    const isOwner = order.restaurant && order.restaurant.ownerId === req.user.id;
 
     if (!(isCustomer || isOwner || req.user.role === 'admin')) {
       return res.status(403).json({ success: false, message: 'Not allowed' });
@@ -96,18 +101,23 @@ router.put('/:id/status', authenticate, [
   body('status').isIn(['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'])
 ], handleValidationErrors, async (req, res, next) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, isDeleted: false }).populate('restaurant', 'owner');
+    const order = await prisma.order.findFirst({
+      where: { id: req.params.id, isDeleted: false },
+      include: { restaurant: { select: { ownerId: true } } }
+    });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-    const isOwner = order.restaurant && String(order.restaurant.owner) === String(req.user._id);
+    const isOwner = order.restaurant && order.restaurant.ownerId === req.user.id;
     if (!(isOwner || req.user.role === 'admin')) {
       return res.status(403).json({ success: false, message: 'Only restaurant owner or admin can update status' });
     }
 
-    order.status = req.body.status;
-    await order.save();
-
-    res.json({ success: true, order });
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { status: req.body.status },
+      include: { items: true }
+    });
+    res.json({ success: true, order: updated });
   } catch (error) {
     next(error);
   }

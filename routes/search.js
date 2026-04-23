@@ -1,42 +1,42 @@
 const express = require('express');
-const Restaurant = require('../models/Restaurant');
-const MenuItem = require('../models/MenuItem');
+const prisma = require('../lib/prisma');
 const { commonValidators, handleValidationErrors } = require('../middleware/validation');
+const { formatRestaurant } = require('../utils/formatters');
 
 const router = express.Router();
+
+const SORT_MAP = {
+  rating: { averageRating: 'desc' },
+  delivery: { deliveryTimeMinutes: 'asc' },
+  price: { name: 'asc' },
+  popularity: { createdAt: 'desc' }
+};
 
 router.get('/', commonValidators.searchQuery, handleValidationErrors, async (req, res, next) => {
   try {
     const { q = '', cuisine, sort = 'rating' } = req.query;
+    const restaurantWhere = { isDeleted: false };
 
-    const restaurantFilter = {
-      isDeleted: false,
-      ...(cuisine ? { cuisine: { $in: [cuisine] } } : {}),
-      ...(q
-        ? {
-            $or: [
-              { name: { $regex: q, $options: 'i' } },
-              { description: { $regex: q, $options: 'i' } },
-              { 'location.city': { $regex: q, $options: 'i' } }
-            ]
-          }
-        : {})
-    };
+    if (cuisine) restaurantWhere.cuisine = { has: cuisine };
+    if (q) {
+      restaurantWhere.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { locationCity: { contains: q, mode: 'insensitive' } }
+      ];
+    }
 
-    const sortMap = {
-      rating: '-averageRating',
-      delivery: 'deliveryTimeMinutes',
-      price: 'name',
-      popularity: '-createdAt'
-    };
-
-    const restaurants = await Restaurant.find(restaurantFilter).sort(sortMap[sort] || '-averageRating').limit(50);
+    const orderBy = SORT_MAP[sort] || { averageRating: 'desc' };
+    const restaurants = await prisma.restaurant.findMany({ where: restaurantWhere, orderBy, take: 50 });
 
     const menuItems = q
-      ? await MenuItem.find({ isDeleted: false, name: { $regex: q, $options: 'i' } }).limit(50)
+      ? await prisma.menuItem.findMany({
+        where: { isDeleted: false, name: { contains: q, mode: 'insensitive' } },
+        take: 50
+      })
       : [];
 
-    res.json({ success: true, restaurants, menuItems });
+    res.json({ success: true, restaurants: restaurants.map(formatRestaurant), menuItems });
   } catch (error) {
     next(error);
   }

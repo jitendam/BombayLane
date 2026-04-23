@@ -1,17 +1,8 @@
-const mongoose = require('mongoose');
+const prisma = require('../lib/prisma');
 
 const connectDatabase = async () => {
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/bombaylane';
-
-  mongoose.set('strictQuery', true);
-  mongoose.set('sanitizeFilter', true);
-
-  await mongoose.connect(mongoUri, {
-    autoIndex: true,
-    serverSelectionTimeoutMS: 5000
-  });
-
-  return mongoose.connection;
+  await prisma.$connect();
+  return prisma;
 };
 
 module.exports = connectDatabase;

@@ -30,7 +30,7 @@ const authValidators = {
 };
 
 const commonValidators = {
-  objectIdParam: (key = 'id') => [param(key).isMongoId().withMessage(`${key} must be a valid id`)],
+  objectIdParam: (key = 'id') => [param(key).isUUID().withMessage(`${key} must be a valid id`)],
   searchQuery: [query('q').optional().trim().isLength({ min: 1, max: 100 })]
 };
 

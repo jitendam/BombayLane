@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { body } = require('express-validator');
-const User = require('../models/User');
+const prisma = require('../lib/prisma');
 const { generateToken } = require('../utils/jwt');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimit');
@@ -10,26 +10,33 @@ const { authValidators, handleValidationErrors } = require('../middleware/valida
 const router = express.Router();
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
+const USER_SAFE_SELECT = {
+  id: true, name: true, email: true, role: true,
+  phone: true, address: true, preferences: true,
+  isDeleted: true, createdAt: true, updatedAt: true
+};
+
 router.post('/register', authValidators.register, handleValidationErrors, async (req, res, next) => {
   try {
     const { name, password, role, phone, address } = req.body;
     const email = String(req.body.email || '').trim().toLowerCase();
 
-    const existing = await User.findOne()
-      .where('email').equals(email)
-      .where('isDeleted').equals(false);
+    const existing = await prisma.user.findFirst({ where: { email, isDeleted: false } });
     if (existing) {
       return res.status(409).json({ success: false, message: 'Email already in use' });
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const user = await User.create({ name, email, password: hashedPassword, role, phone, address });
+    const user = await prisma.user.create({
+      data: { name, email, password: hashedPassword, role, phone, address },
+      select: USER_SAFE_SELECT
+    });
 
-    const token = generateToken({ id: user._id, role: user.role });
+    const token = generateToken({ id: user.id, role: user.role });
     return res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     return next(error);
@@ -40,10 +47,7 @@ router.post('/login', authLimiter, authValidators.login, handleValidationErrors,
   try {
     const password = req.body.password;
     const email = String(req.body.email || '').trim().toLowerCase();
-    const user = await User.findOne()
-      .where('email').equals(email)
-      .where('isDeleted').equals(false)
-      .select('+password');
+    const user = await prisma.user.findFirst({ where: { email, isDeleted: false } });
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -54,11 +58,11 @@ router.post('/login', authLimiter, authValidators.login, handleValidationErrors,
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const token = generateToken({ id: user._id, role: user.role });
+    const token = generateToken({ id: user.id, role: user.role });
     return res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     return next(error);
@@ -84,7 +88,11 @@ router.put('/profile', authenticate, [
       ...(req.body.preferences && { preferences: req.body.preferences })
     };
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true }).select('-password');
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updates,
+      select: USER_SAFE_SELECT
+    });
     res.json({ success: true, user });
   } catch (error) {
     next(error);

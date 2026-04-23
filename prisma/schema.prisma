@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  customer
+  restaurant_owner
+  admin
+}
+
+enum OrderStatus {
+  placed
+  confirmed
+  preparing
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(customer)
+  phone       String?
+  address     String?
+  preferences Json?
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  restaurants Restaurant[]
+  orders      Order[]
+  reviews     Review[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isDeleted])
+}
+
+model Restaurant {
+  id                  String   @id @default(uuid())
+  name                String
+  description         String?
+  cuisine             String[]
+  ownerId             String
+  owner               User     @relation(fields: [ownerId], references: [id])
+  locationAddress     String
+  locationCity        String
+  locationLat         Float?
+  locationLng         Float?
+  openHours           String   @default("09:00")
+  closeHours          String   @default("22:00")
+  averageRating       Float    @default(0)
+  deliveryTimeMinutes Int      @default(30)
+  isOpen              Boolean  @default(true)
+  isDeleted           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  menuItems MenuItem[]
+  orders    Order[]
+  reviews   Review[]
+
+  @@index([name])
+  @@index([locationCity])
+  @@index([isOpen])
+  @@index([isDeleted])
+  @@index([averageRating])
+}
+
+model MenuItem {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  description  String?
+  category     String?
+  price        Float
+  image        String?
+  isVegetarian Boolean    @default(false)
+  available    Boolean    @default(true)
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([restaurantId])
+  @@index([name])
+  @@index([category])
+  @@index([available])
+  @@index([isDeleted])
+}
+
+model Order {
+  id                  String      @id @default(uuid())
+  customerId          String
+  customer            User        @relation(fields: [customerId], references: [id])
+  restaurantId        String
+  restaurant          Restaurant  @relation(fields: [restaurantId], references: [id])
+  items               OrderItem[]
+  subtotal            Float
+  tax                 Float       @default(0)
+  deliveryFee         Float       @default(0)
+  total               Float
+  status              OrderStatus @default(placed)
+  deliveryAddress     String
+  estimatedDeliveryAt DateTime?
+  isDeleted           Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([customerId])
+  @@index([restaurantId])
+  @@index([status])
+  @@index([isDeleted])
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  name       String
+  quantity   Int
+  price      Float
+}
+
+model Review {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  rating       Int
+  comment      String?
+  photos       String[]
+  helpfulVotes Int        @default(0)
+  isModerated  Boolean    @default(true)
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([restaurantId, userId])
+  @@index([restaurantId])
+  @@index([rating])
+  @@index([isDeleted])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
