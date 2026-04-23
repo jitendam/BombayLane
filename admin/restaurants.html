@@ -1,3 +1,75 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Restaurants</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
-<body><header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header><main class="container"><section class="card"><h1>Restaurant Management</h1><p class="muted">Approve and monitor restaurant profiles via /api/restaurants.</p></section></main></body></html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Restaurants</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
+<body>
+  <script>
+    const _au = JSON.parse(localStorage.getItem('bl_user') || '{}');
+    if (!localStorage.getItem('bl_token') || _au.role !== 'admin') { window.location.href = '/pages/auth.html'; }
+  </script>
+  <header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header>
+  <main class="container">
+    <nav class="nav-links" style="margin-bottom:1rem"><a href="/admin/orders.html">Orders</a><a href="/admin/users.html">Users</a></nav>
+    <section class="card">
+      <h1>Restaurant Management</h1>
+      <div id="restaurants-table"><div class="spinner" aria-label="Loading"></div></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script>
+    async function toggleOpen(restaurantId, isOpen) {
+      try {
+        await BombayLane.api.request(`/api/restaurants/${restaurantId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ isOpen: !isOpen })
+        });
+        BombayLane.notify('Updated');
+        loadRestaurants();
+      } catch (err) {
+        BombayLane.notify(err.message);
+      }
+    }
+
+    async function deleteRestaurant(restaurantId) {
+      if (!confirm('Delete this restaurant?')) return;
+      try {
+        await BombayLane.api.request(`/api/restaurants/${restaurantId}`, { method: 'DELETE' });
+        BombayLane.notify('Restaurant deleted');
+        loadRestaurants();
+      } catch (err) {
+        BombayLane.notify(err.message);
+      }
+    }
+
+    async function loadRestaurants() {
+      const root = document.getElementById('restaurants-table');
+      try {
+        const result = await BombayLane.api.request('/api/restaurants');
+        const restaurants = result.restaurants || [];
+        if (!restaurants.length) { root.innerHTML = '<p class="muted">No restaurants found.</p>'; return; }
+
+        root.innerHTML = `<table style="width:100%;border-collapse:collapse">
+          <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+            <th style="padding:.5rem">Name</th><th style="padding:.5rem">City</th>
+            <th style="padding:.5rem">Rating</th><th style="padding:.5rem">Status</th><th style="padding:.5rem">Actions</th>
+          </tr></thead>
+          <tbody>${restaurants.map((r) => `
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:.5rem"><strong>${BombayLane.escapeHtml(r.name)}</strong></td>
+              <td style="padding:.5rem">${BombayLane.escapeHtml(r.location?.city||'-')}</td>
+              <td style="padding:.5rem">★ ${Number(r.averageRating||0).toFixed(1)}</td>
+              <td style="padding:.5rem"><span class="badge">${r.isOpen ? 'Open' : 'Closed'}</span></td>
+              <td style="padding:.5rem;display:flex;gap:.5rem">
+                <button class="btn btn-secondary" onclick="toggleOpen('${BombayLane.escapeAttr(r._id)}', ${r.isOpen})">${r.isOpen ? 'Close' : 'Open'}</button>
+                <button class="btn btn-danger" onclick="deleteRestaurant('${BombayLane.escapeAttr(r._id)}')">Delete</button>
+              </td>
+            </tr>`).join('')}
+          </tbody></table>`;
+      } catch (err) {
+        root.innerHTML = `<p class="muted">${err.message}</p>`;
+      }
+    }
+
+    loadRestaurants();
+  </script>
+</body></html>

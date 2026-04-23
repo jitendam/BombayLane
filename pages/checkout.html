@@ -8,17 +8,26 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <script>if (!localStorage.getItem('bl_token')) { window.location.href = '/pages/auth.html'; }</script>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+  </header>
   <main class="container">
     <section class="card">
       <h1>Checkout</h1>
-      <p class="muted">Payment integration prepared for Stripe.</p>
       <div class="form-grid">
-        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
-        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
-        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
+        <div>
+          <label class="label" for="delivery-address">Delivery Address</label>
+          <textarea id="delivery-address" class="input" rows="3" placeholder="Enter your delivery address"></textarea>
+        </div>
+        <div id="cart-summary" class="card"></div>
+        <button id="place-order-btn" class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
       </div>
-      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -26,6 +35,11 @@
   <script src="/js/cart.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script>
+    // Pre-fill address from stored user profile
+    const _u = BombayLane.currentUser();
+    if (_u.address) document.getElementById('delivery-address').value = _u.address;
+    BombayLane.cart.render('cart-items', 'cart-summary');
+  </script>
 </body>
 </html>

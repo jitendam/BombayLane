@@ -33,9 +33,14 @@
   padding: .15rem .45rem;
   font-size: .75rem;
 }
-.badge { font-size: .75rem; padding: .2rem .5rem; border-radius: .4rem; background: #fef3c7; }
-.rating { color: #f59e0b; font-weight: 700; }
-.spinner {
+.btn-danger { background: #dc2626; }
+.btn-danger:hover { background: #b91c1c; }
+.admin-select {
+  font: inherit;
+  padding: .3rem;
+  border-radius: .4rem;
+  border: 1px solid var(--border);
+}
   width: 22px;
   height: 22px;
   border-radius: 50%;

@@ -8,17 +8,90 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a><button id="theme-toggle" class="btn btn-secondary">Dark mode</button></header>
+  <script>if (!localStorage.getItem('bl_token')) { window.location.href = '/pages/auth.html'; }</script>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <button id="theme-toggle" class="btn btn-secondary">Dark mode</button>
+    </nav>
+  </header>
   <main class="container">
     <section class="card">
       <h1>My Profile</h1>
-      <pre id="profile-data" class="muted"></pre>
+      <form id="profile-form" class="form-grid" novalidate>
+        <div>
+          <label class="label" for="profile-name">Name</label>
+          <input id="profile-name" class="input" type="text" name="name" placeholder="Your name" minlength="2">
+        </div>
+        <div>
+          <label class="label" for="profile-phone">Phone</label>
+          <input id="profile-phone" class="input" type="text" name="phone" placeholder="Phone number">
+        </div>
+        <div>
+          <label class="label" for="profile-address">Default Delivery Address</label>
+          <textarea id="profile-address" class="input" name="address" rows="2" placeholder="Your address"></textarea>
+        </div>
+        <div class="row">
+          <button class="btn" type="submit">Save Changes</button>
+          <button id="logout-btn" class="btn btn-secondary" type="button">Logout</button>
+        </div>
+      </form>
     </section>
   </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
   <script src="/js/main.js"></script>
   <script>
-    const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
-    document.getElementById('profile-data').textContent = JSON.stringify(user, null, 2) || 'No user logged in';
+    (async () => {
+      function fillForm(user) {
+        document.getElementById('profile-name').value = user.name || '';
+        document.getElementById('profile-phone').value = user.phone || '';
+        document.getElementById('profile-address').value = user.address || '';
+      }
+
+      function cacheUser(user) {
+        const cached = BombayLane.currentUser();
+        localStorage.setItem('bl_user', JSON.stringify({ ...cached, ...user }));
+      }
+
+      // Populate form from server
+      try {
+        const result = await BombayLane.api.request('/api/users/me');
+        const user = result.user || {};
+        fillForm(user);
+        cacheUser(user);
+      } catch {
+        // Fall back to cached data if API call fails (e.g. server down)
+        fillForm(BombayLane.currentUser());
+      }
+
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          name: document.getElementById('profile-name').value.trim(),
+          phone: document.getElementById('profile-phone').value.trim(),
+          address: document.getElementById('profile-address').value.trim()
+        };
+        try {
+          const result = await BombayLane.api.request('/api/users/me', {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          cacheUser(result.user);
+          BombayLane.notify('Profile updated');
+        } catch (err) {
+          BombayLane.notify(err.message);
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('bl_token');
+        localStorage.removeItem('bl_user');
+        window.location.href = '/pages/auth.html';
+      });
+    })();
   </script>
 </body>
 </html>

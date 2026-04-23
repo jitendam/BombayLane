@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const User = require('../models/User');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
@@ -24,6 +24,15 @@ router.put('/me', authenticate, [
 
     const user = await User.findByIdAndUpdate(req.user._id, { $set: updates }, { new: true }).select('-password');
     res.json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/', authenticate, authorize('admin'), async (req, res, next) => {
+  try {
+    const users = await User.find({ isDeleted: false }).select('-password').sort('-createdAt').limit(200);
+    res.json({ success: true, users });
   } catch (error) {
     next(error);
   }

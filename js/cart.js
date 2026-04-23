@@ -14,8 +14,16 @@ const writeCart = (cart) => localStorage.setItem(CART_KEY, JSON.stringify(cart))
 
 BombayLane.cart = {
   getItems: readCart,
+  getRestaurantId() {
+    const cart = readCart();
+    return cart.length ? (cart[0].restaurantId || null) : null;
+  },
   add(item) {
     const cart = readCart();
+    if (cart.length && item.restaurantId && cart[0].restaurantId && cart[0].restaurantId !== item.restaurantId) {
+      if (!confirm('Your cart has items from a different restaurant. Clear cart and add this item?')) return;
+      cart.length = 0;
+    }
     const existing = cart.find((entry) => entry.id === item.id);
     if (existing) {
       existing.quantity += item.quantity || 1;

@@ -43,3 +43,15 @@ BombayLane.escapeHtml = (value) => String(value ?? '')
   .replace(/'/g, '&#39;');
 
 BombayLane.escapeAttr = BombayLane.escapeHtml;
+
+BombayLane.authGuard = (redirectTo = '/pages/auth.html') => {
+  if (!localStorage.getItem('bl_token')) {
+    window.location.href = redirectTo;
+    return false;
+  }
+  return true;
+};
+
+BombayLane.currentUser = () => {
+  try { return JSON.parse(localStorage.getItem('bl_user') || '{}'); } catch { return {}; }
+};

@@ -1,3 +1,47 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Users</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
-<body><header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header><main class="container"><section class="card"><h1>User Management</h1><p class="muted">Manage customer and owner accounts.</p></section></main></body></html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Users</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
+<body>
+  <script>
+    const _au = JSON.parse(localStorage.getItem('bl_user') || '{}');
+    if (!localStorage.getItem('bl_token') || _au.role !== 'admin') { window.location.href = '/pages/auth.html'; }
+  </script>
+  <header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header>
+  <main class="container">
+    <nav class="nav-links" style="margin-bottom:1rem"><a href="/admin/orders.html">Orders</a><a href="/admin/restaurants.html">Restaurants</a></nav>
+    <section class="card">
+      <h1>User Management</h1>
+      <div id="users-table"><div class="spinner" aria-label="Loading"></div></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script>
+    async function loadUsers() {
+      const root = document.getElementById('users-table');
+      try {
+        const result = await BombayLane.api.request('/api/users');
+        const users = result.users || [];
+        if (!users.length) { root.innerHTML = '<p class="muted">No users found.</p>'; return; }
+
+        root.innerHTML = `<table style="width:100%;border-collapse:collapse">
+          <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+            <th style="padding:.5rem">Name</th><th style="padding:.5rem">Email</th>
+            <th style="padding:.5rem">Role</th><th style="padding:.5rem">Joined</th>
+          </tr></thead>
+          <tbody>${users.map((u) => `
+            <tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:.5rem">${BombayLane.escapeHtml(u.name)}</td>
+              <td style="padding:.5rem">${BombayLane.escapeHtml(u.email)}</td>
+              <td style="padding:.5rem"><span class="badge">${BombayLane.escapeHtml(u.role)}</span></td>
+              <td style="padding:.5rem">${new Date(u.createdAt).toLocaleDateString()}</td>
+            </tr>`).join('')}
+          </tbody></table>`;
+      } catch (err) {
+        root.innerHTML = `<p class="muted">${err.message}</p>`;
+      }
+    }
+
+    loadUsers();
+  </script>
+</body></html>

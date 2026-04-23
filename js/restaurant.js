@@ -62,7 +62,7 @@ BombayLane.restaurants = {
             <strong>${BombayLane.escapeHtml(item.name)}</strong>
             <p class="muted">₹${Number(item.price || 0)} • ${BombayLane.escapeHtml(item.category || 'General')}</p>
           </div>
-          <button class="btn" onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)} })">Add</button>
+          <button class="btn" onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)}, restaurantId: '${BombayLane.escapeAttr(id)}' })">Add</button>
         </li>
       `).join('');
     } catch (error) {

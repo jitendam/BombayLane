@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
+  <script>
+    const _au = JSON.parse(localStorage.getItem('bl_user') || '{}');
+    if (!localStorage.getItem('bl_token') || _au.role !== 'admin') { window.location.href = '/pages/auth.html'; }
+  </script>
   <header class="topbar"><a class="brand" href="/index.html">BombayLane Admin</a></header>
   <main class="container">
     <nav class="nav-links"><a href="/admin/restaurants.html">Restaurants</a><a href="/admin/orders.html">Orders</a><a href="/admin/users.html">Users</a></nav>

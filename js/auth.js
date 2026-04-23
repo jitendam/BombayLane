@@ -29,6 +29,7 @@ BombayLane.auth = {
         });
         setAuth(result.token, result.user);
         BombayLane.notify('Logged in successfully');
+        setTimeout(() => { window.location.href = '/pages/restaurants.html'; }, 600);
       } catch (error) {
         BombayLane.notify(error.message);
       }
@@ -57,6 +58,7 @@ BombayLane.auth = {
         });
         setAuth(result.token, result.user);
         BombayLane.notify('Registration complete');
+        setTimeout(() => { window.location.href = '/pages/restaurants.html'; }, 600);
       } catch (error) {
         BombayLane.notify(error.message);
       }

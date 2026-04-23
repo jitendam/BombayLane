@@ -1,14 +1,5 @@
 window.BombayLane = window.BombayLane || {};
 
-const nextStatus = {
-  placed: 'confirmed',
-  confirmed: 'preparing',
-  preparing: 'out_for_delivery',
-  out_for_delivery: 'delivered',
-  delivered: 'delivered',
-  cancelled: 'cancelled'
-};
-
 BombayLane.orders = {
   async placeOrder() {
     const cart = BombayLane.cart.getItems();
@@ -17,12 +8,20 @@ BombayLane.orders = {
       return;
     }
 
-    const restaurantId = document.getElementById('restaurant-id')?.value;
-    const deliveryAddress = document.getElementById('delivery-address')?.value;
-    if (!restaurantId || !deliveryAddress) {
-      BombayLane.notify('Restaurant ID and delivery address are required.');
+    const restaurantId = BombayLane.cart.getRestaurantId();
+    if (!restaurantId) {
+      BombayLane.notify('No restaurant associated with cart. Please add items from a restaurant first.');
       return;
     }
+
+    const deliveryAddress = document.getElementById('delivery-address')?.value?.trim();
+    if (!deliveryAddress) {
+      BombayLane.notify('Please enter a delivery address.');
+      return;
+    }
+
+    const btn = document.getElementById('place-order-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Placing order…'; }
 
     try {
       await BombayLane.api.request('/api/orders', {
@@ -36,8 +35,10 @@ BombayLane.orders = {
 
       BombayLane.cart.clear();
       BombayLane.notify('Order placed successfully');
+      setTimeout(() => { window.location.href = '/pages/orders.html'; }, 800);
     } catch (error) {
       BombayLane.notify(error.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
     }
   },
   async loadHistory() {
@@ -47,9 +48,23 @@ BombayLane.orders = {
     try {
       const result = await BombayLane.api.request('/api/orders');
       const orders = result.orders || [];
+      const activeStatuses = new Set(['placed', 'confirmed', 'preparing', 'out_for_delivery']);
 
       list.innerHTML = orders.length
-        ? orders.map((order) => `<li class="card"><div class="row"><strong>#${BombayLane.escapeHtml(order._id.slice(-6))}</strong><span class="badge">${BombayLane.escapeHtml(order.status)}</span></div><p>Total: ₹${Number(order.total || 0)}</p><button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${BombayLane.escapeAttr(order._id)}')">Reorder</button></li>`).join('')
+        ? orders.map((order) => {
+          const isActive = activeStatuses.has(order.status);
+          return `<li class="card">
+            <div class="row">
+              <strong>#${BombayLane.escapeHtml(order._id.slice(-6))}</strong>
+              <span class="badge">${BombayLane.escapeHtml(order.status)}</span>
+            </div>
+            <p class="muted">Total: ₹${Number(order.total || 0).toFixed(2)}</p>
+            <div class="row" style="margin-top:.5rem">
+              <button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${BombayLane.escapeAttr(order._id)}')">Reorder</button>
+              ${isActive ? `<button class="btn" onclick="BombayLane.orders.startTracking('${BombayLane.escapeAttr(order._id)}')">Track</button>` : ''}
+            </div>
+          </li>`;
+        }).join('')
         : '<li class="card">No orders yet.</li>';
     } catch (error) {
       BombayLane.notify(error.message);
@@ -67,21 +82,25 @@ BombayLane.orders = {
     }
   },
   startTracking(orderId) {
+    const section = document.getElementById('tracking-section');
+    const label = document.getElementById('tracking-order-label');
     const tracker = document.getElementById('order-status');
     if (!tracker) return;
 
-    let current = 'placed';
-    tracker.textContent = current;
+    if (label) label.textContent = '#' + orderId.slice(-6);
+    if (section) section.style.display = '';
+    tracker.textContent = 'loading…';
 
+    let currentStatus = 'placed';
     const timer = setInterval(async () => {
       try {
         const result = await BombayLane.api.request(`/api/orders/${orderId}`);
-        current = result.order.status || current;
+        currentStatus = result.order.status || currentStatus;
       } catch {
-        current = nextStatus[current] || current;
+        // keep previous status on network error
       }
-      tracker.textContent = current;
-      if (current === 'delivered' || current === 'cancelled') clearInterval(timer);
+      tracker.textContent = currentStatus;
+      if (currentStatus === 'delivered' || currentStatus === 'cancelled') clearInterval(timer);
     }, 5000);
   }
 };

@@ -8,16 +8,24 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <script>if (!localStorage.getItem('bl_token')) { window.location.href = '/pages/auth.html'; }</script>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+      <a href="/pages/profile.html">Profile</a>
+    </nav>
+  </header>
   <main class="container">
     <section class="card">
       <h1>Order History</h1>
       <ul id="orders-list" class="list"></ul>
     </section>
-    <section class="card">
-      <h2>Live order tracking</h2>
-      <p>Current status: <strong id="order-status">-</strong></p>
-      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
+    <section class="card" id="tracking-section" style="display:none">
+      <h2>Live tracking: <span id="tracking-order-label"></span></h2>
+      <p>Status: <strong id="order-status">-</strong></p>
+      <button class="btn btn-secondary" onclick="document.getElementById('tracking-section').style.display='none'">Close</button>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
