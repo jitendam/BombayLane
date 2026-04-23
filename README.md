@@ -7,21 +7,40 @@ BombayLane is a full-stack food ordering platform with secure authentication, re
 - **Security:** Helmet, CORS, rate limiting, input validation, sanitization
 - **Frontend:** HTML, CSS, vanilla JavaScript (mobile-first responsive UI)
 
-## Quick Start
-1. Copy environment template and configure secrets:
+## Quick Start (Demo mode — no MongoDB required)
+
+The fastest way to run the site for a demo uses an in-memory server that is pre-seeded with data and requires no database:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Copy the environment template:
    ```bash
    cp .env.example .env
    ```
-2. Start MongoDB locally (in a separate terminal):
+3. Start the demo server:
+   ```bash
+   npm run demo
+   ```
+4. Open **http://localhost:5000** in your browser.
+
+## Quick Start (Production mode — requires MongoDB)
+
+1. Install dependencies and copy the environment template:
+   ```bash
+   npm install
+   cp .env.example .env
+   ```
+2. Start MongoDB locally (separate terminal):
    ```bash
    mongod
    ```
-3. Install dependencies and seed the database with demo data:
+3. Seed the database:
    ```bash
-   npm install
    npm run seed
    ```
-4. Start server:
+4. Start the server:
    ```bash
    npm run dev
    ```

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "demo": "node demo-server.js",
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
