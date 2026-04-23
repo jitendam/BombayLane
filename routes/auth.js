@@ -6,6 +6,7 @@ const { generateToken } = require('../utils/jwt');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimit');
 const { authValidators, handleValidationErrors } = require('../middleware/validation');
+const { getSupabaseAdmin } = require('../lib/supabase');
 
 const router = express.Router();
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
@@ -53,9 +54,73 @@ router.post('/login', authLimiter, authValidators.login, handleValidationErrors,
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    if (!user.password) {
+      return res.status(401).json({ success: false, message: 'This account uses GitHub login. Please use the "Login with GitHub" button.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const token = generateToken({ id: user.id, role: user.role });
+    return res.json({
+      success: true,
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// ── GitHub OAuth ──────────────────────────────────────────────────────────────
+
+// Step 1: redirect the browser to Supabase → GitHub
+router.get('/github', (_req, res) => {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) {
+    return res.status(503).json({ success: false, message: 'GitHub login is not configured' });
+  }
+  const appBase = (process.env.APP_BASE_URL || '').replace(/\/$/, '');
+  const callbackUrl = `${appBase}/pages/auth-callback.html`;
+  const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(callbackUrl)}`;
+  return res.redirect(authUrl);
+});
+
+// Step 2: receive the Supabase access_token from the callback page and issue a JWT
+router.post('/github/exchange', authLimiter, async (req, res, next) => {
+  try {
+    const { access_token } = req.body;
+    if (!access_token || typeof access_token !== 'string') {
+      return res.status(400).json({ success: false, message: 'access_token is required' });
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(access_token);
+
+    if (error || !supabaseUser) {
+      return res.status(401).json({ success: false, message: 'Invalid GitHub token' });
+    }
+
+    const email = (supabaseUser.email || '').trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'GitHub account must have a public email' });
+    }
+
+    // GitHub user_metadata field priority: full_name (display name) → name → user_name (login handle)
+    const name = supabaseUser.user_metadata?.full_name
+      || supabaseUser.user_metadata?.name
+      || supabaseUser.user_metadata?.user_name
+      || email.split('@')[0];
+
+    // Upsert the user – create if not present, update name if already exists
+    let user = await prisma.user.findFirst({ where: { email, isDeleted: false } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { name, email, password: null, role: 'customer' },
+        select: USER_SAFE_SELECT
+      });
     }
 
     const token = generateToken({ id: user.id, role: user.role });
