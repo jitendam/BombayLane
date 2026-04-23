@@ -27,11 +27,11 @@ BombayLane.restaurants = {
 
       const cards = data.map((restaurant) => `
         <article class="card restaurant-card fade-in">
-          <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(restaurant._id)}/400/200" alt="${BombayLane.escapeAttr(restaurant.name)}" loading="lazy">
+          <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(restaurant.id)}/400/200" alt="${BombayLane.escapeAttr(restaurant.name)}" loading="lazy">
           <h3>${BombayLane.escapeHtml(restaurant.name)}</h3>
           <p class="muted">${BombayLane.escapeHtml(restaurant.location?.city || '')}</p>
           <p class="rating">★ ${Number(restaurant.averageRating || 0).toFixed(1)}</p>
-          <a class="btn" href="/pages/restaurant-detail.html?id=${encodeURIComponent(restaurant._id)}">View Menu</a>
+          <a class="btn" href="/pages/restaurant-detail.html?id=${encodeURIComponent(restaurant.id)}">View Menu</a>
         </article>
       `).join('');
 
@@ -62,7 +62,7 @@ BombayLane.restaurants = {
             <strong>${BombayLane.escapeHtml(item.name)}</strong>
             <p class="muted">₹${Number(item.price || 0)} • ${BombayLane.escapeHtml(item.category || 'General')}</p>
           </div>
-          <button class="btn" onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)}, restaurantId: '${BombayLane.escapeAttr(id)}' })">Add</button>
+          <button class="btn" onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item.id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)}, restaurantId: '${BombayLane.escapeAttr(id)}' })">Add</button>
         </li>
       `).join('');
     } catch (error) {

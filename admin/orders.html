@@ -46,12 +46,12 @@
           </tr></thead>
           <tbody>${orders.map((o) => `
             <tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:.5rem;font-family:monospace">#${BombayLane.escapeHtml(o._id.slice(-6))}</td>
+              <td style="padding:.5rem;font-family:monospace">#${BombayLane.escapeHtml(o.id.slice(-6))}</td>
               <td style="padding:.5rem">${BombayLane.escapeHtml(o.customer || '-')}</td>
               <td style="padding:.5rem">₹${Number(o.total||0).toFixed(2)}</td>
               <td style="padding:.5rem"><span class="badge">${BombayLane.escapeHtml(o.status)}</span></td>
               <td style="padding:.5rem">
-                <select onchange="updateStatus('${BombayLane.escapeAttr(o._id)}', this.value)" class="admin-select">
+                <select onchange="updateStatus('${BombayLane.escapeAttr(o.id)}', this.value)" class="admin-select">
                   ${STATUS_OPTIONS.map((s) => `<option value="${s}"${s===o.status?' selected':''}>${s}</option>`).join('')}
                 </select>
               </td>

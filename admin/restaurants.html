@@ -60,8 +60,8 @@
               <td style="padding:.5rem">★ ${Number(r.averageRating||0).toFixed(1)}</td>
               <td style="padding:.5rem"><span class="badge">${r.isOpen ? 'Open' : 'Closed'}</span></td>
               <td style="padding:.5rem;display:flex;gap:.5rem">
-                <button class="btn btn-secondary" onclick="toggleOpen('${BombayLane.escapeAttr(r._id)}', ${r.isOpen})">${r.isOpen ? 'Close' : 'Open'}</button>
-                <button class="btn btn-danger" onclick="deleteRestaurant('${BombayLane.escapeAttr(r._id)}')">Delete</button>
+                <button class="btn btn-secondary" onclick="toggleOpen('${BombayLane.escapeAttr(r.id)}', ${r.isOpen})">${r.isOpen ? 'Close' : 'Open'}</button>
+                <button class="btn btn-danger" onclick="deleteRestaurant('${BombayLane.escapeAttr(r.id)}')">Delete</button>
               </td>
             </tr>`).join('')}
           </tbody></table>`;

@@ -55,13 +55,13 @@ BombayLane.orders = {
           const isActive = activeStatuses.has(order.status);
           return `<li class="card">
             <div class="row">
-              <strong>#${BombayLane.escapeHtml(order._id.slice(-6))}</strong>
+              <strong>#${BombayLane.escapeHtml(order.id.slice(-6))}</strong>
               <span class="badge">${BombayLane.escapeHtml(order.status)}</span>
             </div>
             <p class="muted">Total: ₹${Number(order.total || 0).toFixed(2)}</p>
             <div class="row" style="margin-top:.5rem">
-              <button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${BombayLane.escapeAttr(order._id)}')">Reorder</button>
-              ${isActive ? `<button class="btn" onclick="BombayLane.orders.startTracking('${BombayLane.escapeAttr(order._id)}')">Track</button>` : ''}
+              <button class="btn btn-secondary" onclick="BombayLane.orders.reorder('${BombayLane.escapeAttr(order.id)}')">Reorder</button>
+              ${isActive ? `<button class="btn" onclick="BombayLane.orders.startTracking('${BombayLane.escapeAttr(order.id)}')">Track</button>` : ''}
             </div>
           </li>`;
         }).join('')
