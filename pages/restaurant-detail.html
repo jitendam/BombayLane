@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Detail | BombayLane</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+  </header>
+  <main class="container">
+    <section class="card">
+      <h1 id="restaurant-name">Restaurant</h1>
+      <p id="restaurant-meta" class="muted">Loading...</p>
+    </section>
+    <ul id="menu-list" class="list"></ul>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/restaurant.js"></script>
+  <script src="/js/main.js"></script>
+  <script>BombayLane.restaurants.init();</script>
+</body>
+</html>

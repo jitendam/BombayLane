@@ -3,38 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BombayLane | Authentic Indian Cuisine</title>
-  <link rel="stylesheet" href="style.css">
+  <title>BombayLane | Food Delivery</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-
-  <header class="header">
-    <h1 class="logo">Bombay<span>Lane</span></h1>
-    <button class="cart-btn">🛒 Cart (<span id="cart-count">2</span>)</button>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
 
-  <main class="menu-container">
-    <article class="menu-card">
-      <div class="menu-card__image" style="background-color: #ddd; height: 150px;"></div>
-      <div class="menu-card__content">
-        <h2>Butter Chicken Bowl</h2>
-        <p>Grilled cottage cheese cubes in a spiced onion-tomato gravy. Served with 2 Naans.</p>
-        <div class="menu-card__footer">
-          <span class="price">₹250</span>
-          <button class="add-to-cart-btn" onclick="orderManager.processOrder()">Add to Cart</button>
-        </div>
+  <main class="container">
+    <section class="hero card fade-in">
+      <h1>Order authentic meals in minutes</h1>
+      <p>Search restaurants, add favorites to cart, and track every step from kitchen to doorstep.</p>
+      <div class="actions">
+        <a class="btn" href="/pages/restaurants.html">Start Ordering</a>
+        <a class="btn btn-secondary" href="/pages/auth.html">Login / Register</a>
       </div>
-    </article>
+    </section>
+
+    <section class="grid cols-3" aria-label="Quick actions">
+      <article class="card">
+        <h2>Explore Restaurants</h2>
+        <p>Filter by cuisine, ratings, and delivery time.</p>
+      </article>
+      <article class="card">
+        <h2>Live Tracking</h2>
+        <p>Follow order status in real time from placed to delivered.</p>
+      </article>
+      <article class="card">
+        <h2>Secure Checkout</h2>
+        <p>Validated checkout flow with taxes and delivery fee calculation.</p>
+      </article>
+    </section>
   </main>
 
-  <dialog id="order-dialog" class="dialog">
-    <div class="dialog__content">
-      <h3 class="dialog__title">Order Confirmed!</h3>
-      <p class="dialog__text">Thank you for ordering with BombayLane! Your food is being prepared.</p>
-      <button id="dialog-close-btn" class="dialog__btn">OK</button>
-    </div>
-  </dialog>
-
-  <script src="script.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/main.js"></script>
 </body>
 </html>

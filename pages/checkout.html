@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | BombayLane</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <main class="container">
+    <section class="card">
+      <h1>Checkout</h1>
+      <p class="muted">Payment integration prepared for Stripe.</p>
+      <div class="form-grid">
+        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
+        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
+        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
+      </div>
+      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/orders.js"></script>
+  <script src="/js/main.js"></script>
+  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+</body>
+</html>
