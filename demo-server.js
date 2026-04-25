@@ -27,8 +27,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'demo-secret-bombaylane';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const DEMO_PASSWORD = 'Demo@1234';
 const TAX_RATE = Number(process.env.TAX_RATE || 0.05);
-const FREE_DELIVERY_THRESHOLD = Number(process.env.FREE_DELIVERY_THRESHOLD || 500);
-const BASE_DELIVERY_FEE = Number(process.env.BASE_DELIVERY_FEE || 40);
+const FREE_DELIVERY_THRESHOLD = Number(process.env.FREE_DELIVERY_THRESHOLD || 1500);
+const BASE_DELIVERY_FEE = Number(process.env.BASE_DELIVERY_FEE || 199);
 
 // ── ID generator ──────────────────────────────────────────────────────────────
 let seq = 0;
@@ -76,50 +76,47 @@ async function seedData () {
   db.restaurants.push(
     {
       _id: r1, name: 'Bombay Lanes',
-      description: 'Authentic Indian cuisine with a modern twist, right in the heart of the city',
-      cuisine: ['North Indian', 'Street Food', 'Mughlai'], owner: ownerId,
-      location: { address: '12 Linking Road, Bandra', city: 'Mumbai', coordinates: { lat: 19.06, lng: 72.84 } },
-      openingHours: { open: '11:00', close: '23:00' },
-      averageRating: 4.6, deliveryTimeMinutes: 30, isOpen: true, isDeleted: false, createdAt: new Date(),
-      imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&h=400&fit=crop&auto=format&q=80'
+      description: 'Authentic Mumbai street food — Vada Pav, Pav Bhaji, Frankie Rolls and Chaats. A true taste of Bombay in Edmonton Green.',
+      cuisine: ['Mumbai Street Food', 'Indo-Chinese', 'Chaats'], owner: ownerId,
+      location: { address: 'Edmonton Green Shopping Centre', city: 'London', coordinates: { lat: 51.6272, lng: -0.0514 } },
+      openingHours: { open: '11:00', close: '22:00' },
+      averageRating: 4.6, deliveryTimeMinutes: 25, isOpen: true, isDeleted: false, createdAt: new Date(),
+      imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=1200&h=400&fit=crop&auto=format&q=80'
     }
   );
 
-  // Menu items
+  // Menu items — sourced from the real Bombay Lanes (Edmonton Green) Deliveroo listing.
+  // Prices are stored in pence (GBP × 100).
   const IMG = 'https://images.unsplash.com/';
   const items = [
-    // Starters
-    { restaurant: r1, name: 'Chicken Tikka', description: 'Tender chicken marinated in spiced yogurt, grilled in tandoor', category: 'Starters', price: 280, isVegetarian: false, imageUrl: `${IMG}photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Paneer Tikka', description: 'Cottage cheese marinated in spiced yogurt, grilled in tandoor', category: 'Starters', price: 240, isVegetarian: true, imageUrl: `${IMG}photo-1567188040759-fb8a883dc6d8?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Samosa (2 pcs)', description: 'Crispy pastry filled with spiced potatoes and peas', category: 'Starters', price: 80, isVegetarian: true, imageUrl: `${IMG}photo-1601050690597-df0568f70950?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Onion Bhaji', description: 'Golden fried onion fritters with mint chutney', category: 'Starters', price: 120, isVegetarian: true, imageUrl: `${IMG}photo-1630409346824-4f0e7b080087?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Seekh Kebab', description: 'Spiced minced lamb skewers grilled over charcoal', category: 'Starters', price: 320, isVegetarian: false, imageUrl: `${IMG}photo-1599487488170-d11ec9c172f0?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Aloo Chaat', description: 'Mumbai-style spiced potato chaat with tamarind and chutneys', category: 'Starters', price: 100, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    // Starters (Chaats & Crispy Cravings)
+    { restaurant: r1, name: 'Dahi Gol Gappa', description: 'Crispy puris filled with potato, chickpeas, yogurt and sweet tamarind chutney (6 pieces)', category: 'Starters', price: 560, isVegetarian: true, imageUrl: `${IMG}photo-1514512364185-4c4956a14d4e?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Samosa', description: 'Crisp pastry filled with spiced potato and peas, served with chutney (1 piece)', category: 'Starters', price: 210, isVegetarian: true, imageUrl: `${IMG}photo-1601050690597-df0568f70950?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Onion Pakora', description: 'Golden onion fritters in crispy gram flour batter, served with mint chutney (5 pieces)', category: 'Starters', price: 350, isVegetarian: true, imageUrl: `${IMG}photo-1630409346824-4f0e7b080087?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Manchurian', description: 'Indo-Chinese vegetable balls in tangy garlic soy sauce with spring onions (8 pieces)', category: 'Starters', price: 840, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Masala Chips', description: 'Crispy chips tossed in aromatic masala spices with chutneys', category: 'Starters', price: 490, isVegetarian: true, imageUrl: `${IMG}photo-1542444459-db68b5c8d0c1?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Chips Side Winders', description: 'Curly seasoned potato chips, crispy and golden', category: 'Starters', price: 350, isVegetarian: true, imageUrl: `${IMG}photo-1559181567-c3190ca9959b?w=400&h=250&fit=crop&auto=format&q=80` },
+    // Vada Pav — Bombai Ki Shaan
+    { restaurant: r1, name: 'Classic Vada Pav', description: 'Golden fried potato vada in a soft pav with garlic, green and tamarind chutneys', category: 'Vada Pav', price: 280, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Butter Vada Pav', description: 'Potato vada in a pav brushed with salted butter, served with three chutneys', category: 'Vada Pav', price: 350, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Cheesy Vada Pav', description: 'Butter vada pav loaded with melted cheese — comfort food at its finest', category: 'Vada Pav', price: 420, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Szechuan Vada Pav', description: 'Vada pav with a spicy kick of Szechuan sauce for an Indo-Chinese twist', category: 'Vada Pav', price: 420, isVegetarian: true, imageUrl: `${IMG}photo-1606491956689-2ea866880c84?w=400&h=250&fit=crop&auto=format&q=80` },
+    // Frankie Rolls
+    { restaurant: r1, name: 'Classic Veg Frankie', description: 'Spiced potato stuffing with onions, cabbage, lettuce, cheese and chef\'s secret sauce in roti', category: 'Frankie Rolls', price: 490, isVegetarian: true, imageUrl: `${IMG}photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Paneer Cheese Frankie', description: 'Spiced paneer with potato stuffing, onions, loads of melted cheese and chef\'s sauce in roti', category: 'Frankie Rolls', price: 770, isVegetarian: true, imageUrl: `${IMG}photo-1567188040759-fb8a883dc6d8?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Manchurian Frankie', description: 'Manchurian balls, potato stuffing, onions, cabbage, mayo, lettuce and cheese in roti', category: 'Frankie Rolls', price: 770, isVegetarian: true, imageUrl: `${IMG}photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Loaded Noodles Frankie', description: 'Spiced noodles, potato stuffing, onions, lettuce, mayo, cabbage and cheese in roti', category: 'Frankie Rolls', price: 630, isVegetarian: true, imageUrl: `${IMG}photo-1555949258-eb67b1ef0ceb?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Paneer Makhani Frankie', description: 'Paneer in rich makhani sauce wrapped in roti with onions, lettuce and chutneys', category: 'Frankie Rolls', price: 910, isVegetarian: true, imageUrl: `${IMG}photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop&auto=format&q=80` },
     // Mains
-    { restaurant: r1, name: 'Butter Chicken', description: 'Tender chicken in velvety tomato-cream sauce', category: 'Mains', price: 380, isVegetarian: false, imageUrl: `${IMG}photo-1588166524941-3bf61a9c41db?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Chicken Biryani', description: 'Fragrant basmati rice layered with slow-cooked spiced chicken', category: 'Mains', price: 420, isVegetarian: false, imageUrl: `${IMG}photo-1563379091339-03b21ab4a4f8?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Lamb Rogan Josh', description: 'Slow-braised Kashmiri lamb in aromatic gravy', category: 'Mains', price: 440, isVegetarian: false, imageUrl: `${IMG}photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Paneer Butter Masala', description: 'Cottage cheese in rich tomato-butter sauce', category: 'Mains', price: 320, isVegetarian: true, imageUrl: `${IMG}photo-1567188040759-fb8a883dc6d8?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Dal Makhani', description: 'Slow-cooked black lentils simmered overnight in cream and butter', category: 'Mains', price: 260, isVegetarian: true, imageUrl: `${IMG}photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Palak Paneer', description: 'Cottage cheese in smooth spiced spinach gravy', category: 'Mains', price: 300, isVegetarian: true, imageUrl: `${IMG}photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Chhole (Chickpea Curry)', description: 'Hearty spiced chickpeas in tangy tomato gravy', category: 'Mains', price: 240, isVegetarian: true, imageUrl: `${IMG}photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Prawn Masala', description: 'Juicy prawns in a rich coastal spice gravy', category: 'Mains', price: 480, isVegetarian: false, imageUrl: `${IMG}photo-1534482421-64566f976cfa?w=400&h=250&fit=crop&auto=format&q=80` },
-    // Rice & Breads
-    { restaurant: r1, name: 'Steamed Basmati Rice', description: 'Fragrant long-grain basmati rice', category: 'Rice & Breads', price: 80, isVegetarian: true, imageUrl: `${IMG}photo-1536304929831-ee1ca9d44906?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Garlic Naan', description: 'Soft leavened bread brushed with garlic butter', category: 'Rice & Breads', price: 60, isVegetarian: true, imageUrl: `${IMG}photo-1574071318508-1cdbab80d002?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Butter Naan', description: 'Pillowy tandoor bread finished with butter', category: 'Rice & Breads', price: 50, isVegetarian: true, imageUrl: `${IMG}photo-1574071318508-1cdbab80d002?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Laccha Paratha', description: 'Flaky layered whole-wheat bread', category: 'Rice & Breads', price: 55, isVegetarian: true, imageUrl: `${IMG}photo-1555949258-eb67b1ef0ceb?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Vegetable Biryani', description: 'Fragrant basmati rice with seasonal vegetables and whole spices', category: 'Rice & Breads', price: 300, isVegetarian: true, imageUrl: `${IMG}photo-1589302168068-964664d93dc0?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Pav Bhaji', description: 'Mumbai\'s iconic spiced vegetable mash served with 2 toasted buttered pav', category: 'Mains', price: 840, isVegetarian: true, imageUrl: `${IMG}photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Pav Bhaji with Paneer', description: 'Classic pav bhaji enriched with paneer chunks, served with 2 buttered pav', category: 'Mains', price: 980, isVegetarian: true, imageUrl: `${IMG}photo-1546833999-b9f581a1996d?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Chicken Curry with Rice', description: 'Slow-cooked chicken in a flavourful curry sauce, served with steamed basmati rice', category: 'Mains', price: 840, isVegetarian: false, imageUrl: `${IMG}photo-1588166524941-3bf61a9c41db?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Chicken Curry with Paratha', description: 'Slow-cooked chicken in a flavourful curry sauce, served with flaky paratha', category: 'Mains', price: 910, isVegetarian: false, imageUrl: `${IMG}photo-1588166524941-3bf61a9c41db?w=400&h=250&fit=crop&auto=format&q=80` },
     // Drinks
-    { restaurant: r1, name: 'Mango Lassi', description: 'Chilled blended yogurt drink with Alphonso mango', category: 'Drinks', price: 100, isVegetarian: true, imageUrl: `${IMG}photo-1571091655789-405eb7a3a3a8?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Sweet Lassi', description: 'Classic chilled sweet yogurt drink', category: 'Drinks', price: 80, isVegetarian: true, imageUrl: `${IMG}photo-1571091655789-405eb7a3a3a8?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Masala Chai', description: 'Freshly brewed spiced Indian tea', category: 'Drinks', price: 40, isVegetarian: true, imageUrl: `${IMG}photo-1567922045116-2a00fae2ed03?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Fresh Lime Soda', description: 'Lime juice with soda, sweet or salted', category: 'Drinks', price: 60, isVegetarian: true, imageUrl: `${IMG}photo-1556679343-c7306c1976bc?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Rose Sharbat', description: 'Chilled rose-flavoured milk drink', category: 'Drinks', price: 70, isVegetarian: true, imageUrl: `${IMG}photo-1544252890-c3e99b934f5c?w=400&h=250&fit=crop&auto=format&q=80` },
-    // Desserts
-    { restaurant: r1, name: 'Gulab Jamun', description: 'Soft milk-solid dumplings soaked in rose-cardamom syrup', category: 'Desserts', price: 120, isVegetarian: true, imageUrl: `${IMG}photo-1558961363-fa8fdf82db35?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Rasmalai', description: 'Soft paneer discs in chilled saffron-cardamom cream', category: 'Desserts', price: 140, isVegetarian: true, imageUrl: `${IMG}photo-1587049352851-8d4e89133924?w=400&h=250&fit=crop&auto=format&q=80` },
-    { restaurant: r1, name: 'Kulfi', description: 'Dense traditional Indian ice cream with pistachio and cardamom', category: 'Desserts', price: 100, isVegetarian: true, imageUrl: `${IMG}photo-1570197788417-0e82375c9371?w=400&h=250&fit=crop&auto=format&q=80` }
+    { restaurant: r1, name: 'Mango Lassi', description: 'Creamy blended yogurt drink with sweet mango flavour', category: 'Drinks', price: 350, isVegetarian: true, imageUrl: `${IMG}photo-1571091655789-405eb7a3a3a8?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Thums Up', description: 'India\'s iconic bold cola with a distinctive strong flavour', category: 'Drinks', price: 200, isVegetarian: true, imageUrl: `${IMG}photo-1553361371-9b22f78e8b1d?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Frooti', description: 'Classic Indian mango fruit drink — sweet and refreshing', category: 'Drinks', price: 200, isVegetarian: true, imageUrl: `${IMG}photo-1519864600265-abb23847ef2c?w=400&h=250&fit=crop&auto=format&q=80` },
+    { restaurant: r1, name: 'Limca', description: 'Fizzy lemon and lime flavoured Indian soft drink', category: 'Drinks', price: 200, isVegetarian: true, imageUrl: `${IMG}photo-1556679343-c7306c1976bc?w=400&h=250&fit=crop&auto=format&q=80` }
   ];
 
   items.forEach((item) => {
