@@ -3,37 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant | BombayLane</title>
+  <title>Menu | Bombay Lanes</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">Bombay Lanes</a>
-    <nav class="nav-links">
-      <a href="/pages/menu.html">← Menu</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/pages/menu.html" aria-current="page">Menu</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/profile.html">Profile</a>
       <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+      <button id="theme-toggle" class="btn btn-secondary">Dark mode</button>
     </nav>
   </header>
 
   <main class="container">
-    <div id="restaurant-loading" class="spinner" style="margin:3rem auto" aria-label="Loading"></div>
-
-    <section class="card restaurant-hero" style="margin-bottom:1rem">
-      <h1 id="restaurant-name">Loading…</h1>
-      <p id="restaurant-meta" class="muted"></p>
-      <p id="restaurant-description" class="muted"></p>
-      <p id="restaurant-hours" class="muted" style="font-size:.9rem"></p>
+    <!-- Restaurant hero loaded dynamically -->
+    <section class="card restaurant-hero" id="restaurant-hero" style="margin-bottom:1rem">
+      <div id="restaurant-loading" class="spinner" style="margin:2rem auto" aria-label="Loading"></div>
+      <h1 id="restaurant-name" style="display:none">Bombay Lanes</h1>
+      <p id="restaurant-meta" class="muted" style="display:none"></p>
+      <p id="restaurant-description" class="muted" style="display:none"></p>
+      <p id="restaurant-hours" class="muted" style="font-size:.9rem;display:none"></p>
     </section>
 
+    <!-- Category nav tabs (filled by JS) -->
+    <nav id="category-nav" class="category-nav" aria-label="Menu categories"></nav>
+
+    <!-- Menu items (filled by JS) -->
     <div id="menu-list"></div>
 
     <!-- Reviews -->
-    <section class="card" style="margin-top:1.5rem">
-      <h2>Reviews</h2>
+    <section class="card" id="reviews-section" style="margin-top:1.5rem;display:none">
+      <h2>Customer Reviews</h2>
       <ul id="reviews-list" class="list"></ul>
-
       <details style="margin-top:1rem">
         <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Write a Review</summary>
         <form id="review-form" class="form-grid" style="margin-top:1rem" novalidate>
@@ -57,7 +64,7 @@
     </section>
   </main>
 
-  // Floating cart button
+  <!-- Floating cart button -->
   <a id="view-cart-btn" href="/pages/cart.html" class="floating-cart-btn" aria-label="View cart">
     🛒 Cart <span data-cart-count class="pill">0</span>
   </a>
@@ -67,6 +74,6 @@
   <script src="/js/cart.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script>BombayLane.restaurants.loadMenu();</script>
 </body>
 </html>

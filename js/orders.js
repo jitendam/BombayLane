@@ -114,7 +114,7 @@ BombayLane.orders = {
               </div>
             </li>`;
         }).join('')
-        : '<li class="card muted" style="text-align:center;padding:2rem">No orders yet. <a href="/pages/restaurants.html">Start ordering →</a></li>';
+        : '<li class="card muted" style="text-align:center;padding:2rem">No orders yet. <a href="/pages/menu.html">Start ordering →</a></li>';
 
       // Scroll to highlighted order
       if (highlight) {

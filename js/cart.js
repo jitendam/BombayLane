@@ -123,7 +123,7 @@ BombayLane.cart = {
           </div>
         </li>`;
       }).join('')
-      : '<li class="card muted" style="text-align:center;padding:2rem">Your cart is empty. <a href="/pages/restaurants.html">Browse restaurants →</a></li>';
+      : '<li class="card muted" style="text-align:center;padding:2rem">Your cart is empty. <a href="/pages/menu.html">Browse menu →</a></li>';
 
     if (summary) {
       const totals = this.totals();

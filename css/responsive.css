@@ -1,11 +1,13 @@
 @media (max-width: 900px) {
   .grid.cols-3 { grid-template-columns: 1fr 1fr; }
   .checkout-grid { grid-template-columns: 1fr; }
+  .menu-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 640px) {
   .topbar { flex-direction: column; align-items: flex-start; gap: .6rem; }
   .grid.cols-3 { grid-template-columns: 1fr; }
+  .menu-grid { grid-template-columns: 1fr; }
   .container { padding: .75rem; }
   .btn { width: 100%; }
   .checkout-grid { grid-template-columns: 1fr; }
@@ -13,4 +15,9 @@
   .admin-table th, .admin-table td { padding: .5rem .6rem; }
   .status-bar { flex-wrap: nowrap; }
   .floating-cart-btn { bottom: 1rem; right: 1rem; }
+  .home-hero-img { height: 280px; }
+  .home-hero-content { padding: 1.25rem 1rem 1.75rem; }
+  .home-order-btn { font-size: .95rem; padding: .65rem 1.5rem; }
+  .info-strip { gap: .25rem; }
+  .category-nav { top: 0; }
 }

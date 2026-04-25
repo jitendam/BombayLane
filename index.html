@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BombayLane | Food Delivery</title>
+  <title>Bombay Lanes | Order Online</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/animations.css">
@@ -11,9 +11,9 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
+    <a class="brand" href="/index.html">Bombay Lanes</a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/menu.html">Menu</a>
       <a href="/pages/orders.html">Orders</a>
       <a href="/pages/profile.html">Profile</a>
       <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
@@ -21,33 +21,73 @@
     </nav>
   </header>
 
-  <main class="container">
-    <section class="hero card fade-in" style="margin-bottom:1.5rem">
-      <h1>Bombay Lanes — Order Online</h1>
-      <p>Award-winning Indian restaurant in Lower Edmonton. Starters, curries, biryanis, naans and more — delivered to your door.</p>
-      <div class="actions" style="display:flex;gap:.75rem;flex-wrap:wrap">
-        <a class="btn" href="/pages/restaurants.html">Order Now</a>
-        <a class="btn btn-secondary" href="/pages/auth.html" id="auth-link">Login / Register</a>
+  <main>
+    <!-- Hero banner -->
+    <div class="home-hero">
+      <img src="https://picsum.photos/seed/bombay-lanes-hero/1200/500" alt="Bombay Lanes restaurant" class="home-hero-img">
+      <div class="home-hero-overlay">
+        <div class="home-hero-content">
+          <p class="home-hero-tag">Lower Edmonton · London</p>
+          <h1 class="home-hero-title">Bombay Lanes</h1>
+          <p class="home-hero-sub">Award-winning Indian restaurant. Authentic curries, grills and street food — delivered to your door.</p>
+          <div class="home-hero-actions">
+            <a class="btn home-order-btn" href="/pages/menu.html">Order Now</a>
+            <a class="btn btn-secondary" href="/pages/auth.html" id="auth-link">Login / Register</a>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <section class="grid cols-3" aria-label="Quick actions">
-      <article class="card fade-in">
-        <h2>🍛 Full Menu</h2>
-        <p>Starters, mains, biryanis, fresh naans, desserts and drinks — browse the complete Bombay Lanes menu.</p>
-        <a class="btn" href="/pages/restaurants.html">Browse Menu</a>
-      </article>
-      <article class="card fade-in">
-        <h2>📍 Live Tracking</h2>
-        <p>Follow your order status in real time — from Placed to Out for Delivery to Delivered.</p>
-        <a class="btn btn-secondary" href="/pages/orders.html">My Orders</a>
-      </article>
-      <article class="card fade-in">
-        <h2>🔒 Secure Checkout</h2>
-        <p>Easy checkout with tax and delivery fee calculation. Your address saved for next time.</p>
-        <a class="btn btn-secondary" href="/pages/cart.html">View Cart</a>
-      </article>
-    </section>
+    <div class="container">
+      <!-- Info strip -->
+      <section class="info-strip card fade-in">
+        <div class="info-item">
+          <span class="info-icon">⭐</span>
+          <strong>4.6</strong>
+          <span class="muted">Rating</span>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">🕐</span>
+          <strong>40 min</strong>
+          <span class="muted">Delivery</span>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">🚚</span>
+          <strong>Free</strong>
+          <span class="muted">Over £15</span>
+        </div>
+        <div class="info-item">
+          <span class="info-icon">📍</span>
+          <strong>182 Fore St</strong>
+          <span class="muted">Lower Edmonton</span>
+        </div>
+      </section>
+
+      <!-- Category highlights -->
+      <section class="grid cols-3 fade-in" style="margin-top:1.5rem" aria-label="Menu highlights">
+        <a class="card category-card" href="/pages/menu.html#cat-Starters">
+          <img src="https://picsum.photos/seed/starters-card/600/300" alt="Starters" loading="lazy">
+          <div class="category-card-body">
+            <h2>Starters</h2>
+            <p class="muted">Onion bhaji, seekh kebab, paneer tikka &amp; more</p>
+          </div>
+        </a>
+        <a class="card category-card" href="/pages/menu.html#cat-Mains">
+          <img src="https://picsum.photos/seed/mains-card/600/300" alt="Mains" loading="lazy">
+          <div class="category-card-body">
+            <h2>Mains</h2>
+            <p class="muted">Butter chicken, rogan josh, balti, biryani &amp; more</p>
+          </div>
+        </a>
+        <a class="card category-card" href="/pages/menu.html#cat-Desserts">
+          <img src="https://picsum.photos/seed/desserts-card/600/300" alt="Desserts &amp; Drinks" loading="lazy">
+          <div class="category-card-body">
+            <h2>Desserts &amp; Drinks</h2>
+            <p class="muted">Gulab jamun, kulfi, mango lassi &amp; more</p>
+          </div>
+        </a>
+      </section>
+    </div>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -67,3 +107,4 @@
   </script>
 </body>
 </html>
+
