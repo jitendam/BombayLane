@@ -23,7 +23,7 @@ const path = require('path');
 const os = require('os');
 
 const PORT = parseInt(process.env.PORT || '5000', 10);
-const JWT_SECRET = process.env.JWT_SECRET || 'demo-secret-bombaylane-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'demo-secret-bombaylane';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const DEMO_PASSWORD = 'Demo@1234';
 const TAX_RATE = Number(process.env.TAX_RATE || 0.05);
@@ -543,17 +543,16 @@ seedData().then(() => {
       }
     }
     console.log('');
-    console.log('  ╔══════════════════════════════════════════╗');
-    console.log('  ║       BombayLane Demo Server             ║');
-    console.log('  ╠══════════════════════════════════════════╣');
-    console.log(`  ║  Local:   http://localhost:${PORT}           ║`);
-    console.log(`  ║  LAN:     http://${lanIp}:${PORT}       ║`);
-    console.log('  ╠══════════════════════════════════════════╣');
-    console.log('  ║  Demo credentials (password: Demo@1234) ║');
-    console.log('  ║  user@bombaylane.com   — customer        ║');
-    console.log('  ║  owner@bombaylane.com  — restaurant_owner║');
-    console.log('  ║  admin@bombaylane.com  — admin           ║');
-    console.log('  ╚══════════════════════════════════════════╝');
+    console.log('  BombayLane Demo Server');
+    console.log('  ─────────────────────────────────────────');
+    console.log(`  Local : http://localhost:${PORT}`);
+    console.log(`  LAN   : http://${lanIp}:${PORT}`);
+    console.log('  ─────────────────────────────────────────');
+    console.log('  Demo credentials  (password: Demo@1234)');
+    console.log('  user@bombaylane.com   — customer');
+    console.log('  owner@bombaylane.com  — restaurant_owner');
+    console.log('  admin@bombaylane.com  — admin');
+    console.log('  ─────────────────────────────────────────');
     console.log('');
   });
 });
