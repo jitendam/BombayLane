@@ -1,0 +1,559 @@
+'use strict';
+/**
+ * BombayLane Demo Server
+ * ─────────────────────
+ * Self-contained Express server with in-memory data — no MongoDB required.
+ *
+ * Start:  npm run demo
+ *
+ * Demo accounts (password: Demo@1234)
+ *   user@bombaylane.com    — customer
+ *   owner@bombaylane.com   — restaurant_owner
+ *   admin@bombaylane.com   — admin
+ */
+
+require('dotenv').config();
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const morgan = require('morgan');
+const path = require('path');
+const os = require('os');
+
+const PORT = parseInt(process.env.PORT || '5000', 10);
+const JWT_SECRET = process.env.JWT_SECRET || 'demo-secret-bombaylane-2024';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const DEMO_PASSWORD = 'Demo@1234';
+const TAX_RATE = Number(process.env.TAX_RATE || 0.05);
+const FREE_DELIVERY_THRESHOLD = Number(process.env.FREE_DELIVERY_THRESHOLD || 500);
+const BASE_DELIVERY_FEE = Number(process.env.BASE_DELIVERY_FEE || 40);
+
+// ── ID generator ──────────────────────────────────────────────────────────────
+let seq = 0;
+const newId = () => (++seq).toString(16).padStart(24, '0');
+
+// ── In-memory stores ──────────────────────────────────────────────────────────
+const db = {
+  users: [],
+  restaurants: [],
+  menuItems: [],
+  orders: [],
+  reviews: []
+};
+
+// ── Seed demo data ────────────────────────────────────────────────────────────
+async function seedData () {
+  const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
+
+  // Users
+  const adminId = newId();
+  const ownerId = newId();
+  const customerId = newId();
+
+  db.users.push(
+    {
+      _id: adminId, name: 'Admin User', email: 'admin@bombaylane.com',
+      password: hash, role: 'admin', phone: '9000000001',
+      address: 'Admin Office, Mumbai', isDeleted: false, createdAt: new Date()
+    },
+    {
+      _id: ownerId, name: 'Restaurant Owner', email: 'owner@bombaylane.com',
+      password: hash, role: 'restaurant_owner', phone: '9000000002',
+      address: 'Andheri, Mumbai', isDeleted: false, createdAt: new Date()
+    },
+    {
+      _id: customerId, name: 'Demo Customer', email: 'user@bombaylane.com',
+      password: hash, role: 'customer', phone: '9000000003',
+      address: '14 Linking Road, Bandra, Mumbai', isDeleted: false, createdAt: new Date()
+    }
+  );
+
+  // Restaurants
+  const r1 = newId();
+  const r2 = newId();
+  const r3 = newId();
+  const r4 = newId();
+
+  db.restaurants.push(
+    {
+      _id: r1, name: 'Bombay Bites',
+      description: 'Authentic Mumbai street food and snacks',
+      cuisine: ['Street Food', 'North Indian'], owner: ownerId,
+      location: { address: '12 Juhu Beach Road', city: 'Mumbai', coordinates: { lat: 19.09, lng: 72.87 } },
+      openingHours: { open: '09:00', close: '23:00' },
+      averageRating: 4.5, deliveryTimeMinutes: 25, isOpen: true, isDeleted: false, createdAt: new Date()
+    },
+    {
+      _id: r2, name: 'Spice Garden',
+      description: 'South Indian flavours prepared with traditional recipes',
+      cuisine: ['South Indian'], owner: ownerId,
+      location: { address: '8 Matunga Circle', city: 'Mumbai', coordinates: { lat: 19.05, lng: 72.84 } },
+      openingHours: { open: '07:00', close: '22:00' },
+      averageRating: 4.2, deliveryTimeMinutes: 30, isOpen: true, isDeleted: false, createdAt: new Date()
+    },
+    {
+      _id: r3, name: 'Curry House',
+      description: 'Rich curries and biryanis from across India',
+      cuisine: ['North Indian', 'Mughlai'], owner: ownerId,
+      location: { address: '45 Marine Drive', city: 'Mumbai', coordinates: { lat: 18.94, lng: 72.82 } },
+      openingHours: { open: '11:00', close: '23:30' },
+      averageRating: 4.7, deliveryTimeMinutes: 35, isOpen: true, isDeleted: false, createdAt: new Date()
+    },
+    {
+      _id: r4, name: 'Punjabi Dhaba',
+      description: 'Hearty Punjabi home cooking with generous portions',
+      cuisine: ['North Indian', 'Punjabi'], owner: adminId,
+      location: { address: '99 BKC Road', city: 'Mumbai', coordinates: { lat: 19.06, lng: 72.87 } },
+      openingHours: { open: '08:00', close: '22:30' },
+      averageRating: 4.3, deliveryTimeMinutes: 40, isOpen: true, isDeleted: false, createdAt: new Date()
+    }
+  );
+
+  // Menu items
+  const items = [
+    // Bombay Bites
+    { restaurant: r1, name: 'Vada Pav', description: "Mumbai's favourite street snack", category: 'Snacks', price: 30, isVegetarian: true },
+    { restaurant: r1, name: 'Pav Bhaji', description: 'Spiced mashed vegetables with buttered bun', category: 'Snacks', price: 90, isVegetarian: true },
+    { restaurant: r1, name: 'Bhel Puri', description: 'Puffed rice, sev, and tangy chutney', category: 'Snacks', price: 50, isVegetarian: true },
+    { restaurant: r1, name: 'Sev Puri', description: 'Crispy puris with spicy toppings', category: 'Snacks', price: 60, isVegetarian: true },
+    { restaurant: r1, name: 'Samosa Chole', description: 'Crispy samosa with spicy chickpea curry', category: 'Snacks', price: 70, isVegetarian: true },
+    { restaurant: r1, name: 'Masala Chai', description: 'Spiced Indian tea', category: 'Drinks', price: 25, isVegetarian: true },
+    // Spice Garden
+    { restaurant: r2, name: 'Masala Dosa', description: 'Crispy rice crêpe with spiced potato filling', category: 'Breakfast', price: 110, isVegetarian: true },
+    { restaurant: r2, name: 'Idli Sambar', description: 'Steamed rice cakes with lentil soup', category: 'Breakfast', price: 80, isVegetarian: true },
+    { restaurant: r2, name: 'Uttapam', description: 'Thick rice pancake with vegetables', category: 'Breakfast', price: 95, isVegetarian: true },
+    { restaurant: r2, name: 'Rasam', description: 'Tangy tomato and tamarind soup', category: 'Soups', price: 60, isVegetarian: true },
+    { restaurant: r2, name: 'Curd Rice', description: 'Cooked rice with yogurt and tempering', category: 'Mains', price: 90, isVegetarian: true },
+    // Curry House
+    { restaurant: r3, name: 'Chicken Biryani', description: 'Fragrant basmati rice with slow-cooked chicken', category: 'Mains', price: 280, isVegetarian: false },
+    { restaurant: r3, name: 'Paneer Butter Masala', description: 'Cottage cheese in rich tomato-butter sauce', category: 'Mains', price: 220, isVegetarian: true },
+    { restaurant: r3, name: 'Dal Makhani', description: 'Slow-cooked black lentils in cream', category: 'Mains', price: 180, isVegetarian: true },
+    { restaurant: r3, name: 'Garlic Naan', description: 'Soft leavened bread with garlic butter', category: 'Breads', price: 50, isVegetarian: true },
+    { restaurant: r3, name: 'Gulab Jamun', description: 'Soft milk-solid dumplings in sugar syrup', category: 'Desserts', price: 80, isVegetarian: true },
+    // Punjabi Dhaba
+    { restaurant: r4, name: 'Amritsari Kulcha', description: 'Stuffed bread from Amritsar', category: 'Breads', price: 120, isVegetarian: true },
+    { restaurant: r4, name: 'Sarson da Saag', description: 'Mustard greens with makki di roti', category: 'Mains', price: 160, isVegetarian: true },
+    { restaurant: r4, name: 'Butter Chicken', description: 'Tender chicken in creamy tomato sauce', category: 'Mains', price: 260, isVegetarian: false },
+    { restaurant: r4, name: 'Lassi', description: 'Sweet chilled yogurt drink', category: 'Drinks', price: 70, isVegetarian: true },
+    { restaurant: r4, name: 'Chhole Bhature', description: 'Spicy chickpeas with fried bread', category: 'Mains', price: 140, isVegetarian: true }
+  ];
+
+  items.forEach((item) => {
+    db.menuItems.push({ _id: newId(), available: true, isDeleted: false, createdAt: new Date(), ...item });
+  });
+}
+
+// ── JWT helpers ───────────────────────────────────────────────────────────────
+const signToken = (payload) => jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const decodeToken = (token) => jwt.verify(token, JWT_SECRET);
+
+// ── Auth middleware ───────────────────────────────────────────────────────────
+const authenticate = (req, res, next) => {
+  try {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) return res.status(401).json({ success: false, message: 'Authentication required' });
+    const decoded = decodeToken(token);
+    const user = db.users.find((u) => u._id === decoded.id && !u.isDeleted);
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid token' });
+    req.user = user;
+    return next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+};
+
+const authorize = (...roles) => (req, res, next) => {
+  if (!req.user) return res.status(401).json({ success: false, message: 'Authentication required' });
+  if (!roles.includes(req.user.role)) return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+  return next();
+};
+
+// ── Sanitize user object for responses ───────────────────────────────────────
+const safeUser = (u) => {
+  const { password: _pw, ...rest } = u; // eslint-disable-line no-unused-vars
+  return rest;
+};
+
+// ── Build app ─────────────────────────────────────────────────────────────────
+const app = express();
+
+app.use(compression());
+app.use(morgan('dev'));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Allow all origins in demo mode
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (_req.method === 'OPTIONS') return res.sendStatus(204);
+  return next();
+});
+
+// Relaxed rate limits for demo
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, standardHeaders: true, legacyHeaders: false }));
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname)));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// ── Health ────────────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ success: true, status: 'ok', service: 'BombayLane Demo API' }));
+
+// ── Auth routes ───────────────────────────────────────────────────────────────
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, phone, address, role } = req.body;
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = req.body.password;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email and password are required' });
+    }
+    if (db.users.find((u) => u.email === email && !u.isDeleted)) {
+      return res.status(409).json({ success: false, message: 'Email already in use' });
+    }
+
+    const allowed = ['customer', 'restaurant_owner'];
+    const userRole = allowed.includes(role) ? role : 'customer';
+    const hashed = await bcrypt.hash(password, 10);
+    const user = {
+      _id: newId(), name, email, password: hashed, role: userRole,
+      phone: phone || '', address: address || '',
+      preferences: { cuisines: [], dietary: [] },
+      isDeleted: false, createdAt: new Date()
+    };
+    db.users.push(user);
+    const token = signToken({ id: user._id, role: user.role });
+    return res.status(201).json({ success: true, token, user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = req.body.password;
+    const user = db.users.find((u) => u.email === email && !u.isDeleted);
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    const token = signToken({ id: user._id, role: user.role });
+    return res.json({ success: true, token, user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/auth/logout', authenticate, (_req, res) => res.json({ success: true, message: 'Logged out successfully' }));
+
+app.get('/api/auth/me', authenticate, (req, res) => res.json({ success: true, user: safeUser(req.user) }));
+
+app.put('/api/auth/profile', authenticate, (req, res) => {
+  const user = db.users.find((u) => u._id === req.user._id);
+  if (req.body.name) user.name = req.body.name;
+  if (req.body.phone) user.phone = req.body.phone;
+  if (req.body.address) user.address = req.body.address;
+  if (req.body.preferences) user.preferences = req.body.preferences;
+  res.json({ success: true, user: safeUser(user) });
+});
+
+// ── User routes ───────────────────────────────────────────────────────────────
+app.get('/api/users/me', authenticate, (req, res) => res.json({ success: true, user: safeUser(req.user) }));
+
+app.put('/api/users/me', authenticate, (req, res) => {
+  const user = db.users.find((u) => u._id === req.user._id);
+  if (typeof req.body.name === 'string') user.name = req.body.name;
+  if (typeof req.body.address === 'string') user.address = req.body.address;
+  if (typeof req.body.phone === 'string') user.phone = req.body.phone;
+  if (req.body.preferences && typeof req.body.preferences === 'object') user.preferences = req.body.preferences;
+  res.json({ success: true, user: safeUser(user) });
+});
+
+// ── Restaurant routes ─────────────────────────────────────────────────────────
+app.get('/api/restaurants', (req, res) => {
+  const { cuisine, city, minRating = 0, sort = '-averageRating' } = req.query;
+  let list = db.restaurants.filter((r) => !r.isDeleted && r.averageRating >= Number(minRating));
+  if (cuisine) list = list.filter((r) => r.cuisine.includes(cuisine));
+  if (city) list = list.filter((r) => r.location.city.toLowerCase().includes(String(city).toLowerCase()));
+
+  const sortField = String(sort).replace('-', '');
+  const desc = String(sort).startsWith('-');
+  list.sort((a, b) => {
+    const av = a[sortField] ?? 0;
+    const bv = b[sortField] ?? 0;
+    return desc ? (bv > av ? 1 : -1) : (av > bv ? 1 : -1);
+  });
+  res.json({ success: true, restaurants: list });
+});
+
+app.get('/api/restaurants/:id', (req, res) => {
+  const restaurant = db.restaurants.find((r) => r._id === req.params.id && !r.isDeleted);
+  if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  const owner = db.users.find((u) => u._id === restaurant.owner);
+  return res.json({ success: true, restaurant: { ...restaurant, owner: owner ? safeUser(owner) : null } });
+});
+
+app.post('/api/restaurants', authenticate, authorize('restaurant_owner', 'admin'), (req, res) => {
+  const { name, description, cuisine, location, openingHours, deliveryTimeMinutes } = req.body;
+  if (!name || !location?.address || !location?.city) {
+    return res.status(400).json({ success: false, message: 'name, location.address and location.city are required' });
+  }
+  const restaurant = {
+    _id: newId(), name, description: description || '', cuisine: cuisine || [],
+    owner: req.user._id, location, openingHours: openingHours || { open: '09:00', close: '22:00' },
+    averageRating: 0, deliveryTimeMinutes: deliveryTimeMinutes || 30,
+    isOpen: true, isDeleted: false, createdAt: new Date()
+  };
+  db.restaurants.push(restaurant);
+  return res.status(201).json({ success: true, restaurant });
+});
+
+app.put('/api/restaurants/:id', authenticate, (req, res) => {
+  const restaurant = db.restaurants.find((r) => r._id === req.params.id && !r.isDeleted);
+  if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  if (restaurant.owner !== req.user._id && req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  Object.assign(restaurant, req.body, { _id: restaurant._id, owner: restaurant.owner });
+  return res.json({ success: true, restaurant });
+});
+
+app.delete('/api/restaurants/:id', authenticate, (req, res) => {
+  const restaurant = db.restaurants.find((r) => r._id === req.params.id && !r.isDeleted);
+  if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  if (restaurant.owner !== req.user._id && req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  restaurant.isDeleted = true;
+  return res.json({ success: true, message: 'Restaurant deleted' });
+});
+
+// ── Menu routes ───────────────────────────────────────────────────────────────
+app.get('/api/restaurants/:id/menu', (req, res) => {
+  const items = db.menuItems.filter((m) => m.restaurant === req.params.id && !m.isDeleted && m.available);
+  items.sort((a, b) => (a.category + a.name).localeCompare(b.category + b.name));
+  res.json({ success: true, items });
+});
+
+app.post('/api/restaurants/:id/menu', authenticate, (req, res) => {
+  const restaurant = db.restaurants.find((r) => r._id === req.params.id && !r.isDeleted);
+  if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  if (restaurant.owner !== req.user._id && req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  const { name, price, description, category, isVegetarian } = req.body;
+  if (!name || price == null) {
+    return res.status(400).json({ success: false, message: 'name and price are required' });
+  }
+  const item = {
+    _id: newId(), restaurant: restaurant._id, name, price: Number(price),
+    description: description || '', category: category || 'General',
+    isVegetarian: Boolean(isVegetarian), available: true, isDeleted: false, createdAt: new Date()
+  };
+  db.menuItems.push(item);
+  return res.status(201).json({ success: true, item });
+});
+
+app.put('/api/menu/:id', authenticate, (req, res) => {
+  const item = db.menuItems.find((m) => m._id === req.params.id && !m.isDeleted);
+  if (!item) return res.status(404).json({ success: false, message: 'Menu item not found' });
+  const restaurant = db.restaurants.find((r) => r._id === item.restaurant);
+  if (!restaurant || (restaurant.owner !== req.user._id && req.user.role !== 'admin')) {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  Object.assign(item, req.body, { _id: item._id, restaurant: item.restaurant });
+  return res.json({ success: true, item });
+});
+
+app.delete('/api/menu/:id', authenticate, (req, res) => {
+  const item = db.menuItems.find((m) => m._id === req.params.id && !m.isDeleted);
+  if (!item) return res.status(404).json({ success: false, message: 'Menu item not found' });
+  const restaurant = db.restaurants.find((r) => r._id === item.restaurant);
+  if (!restaurant || (restaurant.owner !== req.user._id && req.user.role !== 'admin')) {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  item.isDeleted = true;
+  return res.json({ success: true, message: 'Menu item deleted' });
+});
+
+// ── Order routes ──────────────────────────────────────────────────────────────
+app.post('/api/orders', authenticate, (req, res) => {
+  try {
+    const { restaurantId, deliveryAddress, items } = req.body;
+    if (!restaurantId || !deliveryAddress || !Array.isArray(items) || !items.length) {
+      return res.status(400).json({ success: false, message: 'restaurantId, deliveryAddress and items are required' });
+    }
+    const restaurant = db.restaurants.find((r) => r._id === restaurantId && !r.isDeleted);
+    if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+
+    const orderItems = items.map((item) => {
+      const menuItem = db.menuItems.find((m) => m._id === item.menuItemId && m.restaurant === restaurantId && !m.isDeleted);
+      if (!menuItem) throw new Error('One or more menu items are invalid');
+      return { menuItem: menuItem._id, name: menuItem.name, quantity: Number(item.quantity || 1), price: menuItem.price };
+    });
+
+    const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const tax = Number((subtotal * TAX_RATE).toFixed(2));
+    const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
+    const total = subtotal + tax + deliveryFee;
+
+    const order = {
+      _id: newId(), customer: req.user._id, restaurant: restaurantId,
+      items: orderItems, subtotal, tax, deliveryFee, total,
+      status: 'placed', deliveryAddress,
+      estimatedDeliveryAt: new Date(Date.now() + (restaurant.deliveryTimeMinutes || 30) * 60000),
+      isDeleted: false, createdAt: new Date()
+    };
+    db.orders.push(order);
+    return res.status(201).json({ success: true, order });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/api/orders', authenticate, (req, res) => {
+  let orders = db.orders.filter((o) => !o.isDeleted);
+  if (req.user.role === 'customer') orders = orders.filter((o) => o.customer === req.user._id);
+  orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ success: true, orders });
+});
+
+app.get('/api/orders/:id', authenticate, (req, res) => {
+  const order = db.orders.find((o) => o._id === req.params.id && !o.isDeleted);
+  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+  const restaurant = db.restaurants.find((r) => r._id === order.restaurant);
+  const isCustomer = order.customer === req.user._id;
+  const isOwner = restaurant && restaurant.owner === req.user._id;
+  if (!isCustomer && !isOwner && req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Not allowed' });
+  }
+  return res.json({ success: true, order: { ...order, restaurant } });
+});
+
+app.put('/api/orders/:id/status', authenticate, (req, res) => {
+  const order = db.orders.find((o) => o._id === req.params.id && !o.isDeleted);
+  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+  const restaurant = db.restaurants.find((r) => r._id === order.restaurant);
+  const isOwner = restaurant && restaurant.owner === req.user._id;
+  if (!isOwner && req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Only restaurant owner or admin can update status' });
+  }
+  const validStatuses = ['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+  if (!validStatuses.includes(req.body.status)) {
+    return res.status(400).json({ success: false, message: 'Invalid status' });
+  }
+  order.status = req.body.status;
+  return res.json({ success: true, order });
+});
+
+// ── Review routes ─────────────────────────────────────────────────────────────
+app.post('/api/restaurants/:id/reviews', authenticate, (req, res) => {
+  const restaurant = db.restaurants.find((r) => r._id === req.params.id && !r.isDeleted);
+  if (!restaurant) return res.status(404).json({ success: false, message: 'Restaurant not found' });
+
+  const rating = Number(req.body.rating);
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+  }
+
+  let review = db.reviews.find((rv) => rv.restaurant === req.params.id && rv.user === req.user._id);
+  if (review) {
+    review.rating = rating;
+    review.comment = req.body.comment || '';
+    review.photos = Array.isArray(req.body.photos) ? req.body.photos : [];
+  } else {
+    review = {
+      _id: newId(), restaurant: req.params.id, user: req.user._id,
+      rating, comment: req.body.comment || '',
+      photos: Array.isArray(req.body.photos) ? req.body.photos : [],
+      helpfulVotes: 0, isModerated: true, isDeleted: false, createdAt: new Date()
+    };
+    db.reviews.push(review);
+  }
+
+  // Recalculate average rating
+  const restaurantReviews = db.reviews.filter((rv) => rv.restaurant === req.params.id && !rv.isDeleted);
+  const avg = restaurantReviews.reduce((sum, rv) => sum + rv.rating, 0) / (restaurantReviews.length || 1);
+  restaurant.averageRating = Number(avg.toFixed(2));
+
+  return res.status(201).json({ success: true, review });
+});
+
+app.get('/api/restaurants/:id/reviews', (req, res) => {
+  const reviews = db.reviews
+    .filter((rv) => rv.restaurant === req.params.id && !rv.isDeleted)
+    .map((rv) => {
+      const user = db.users.find((u) => u._id === rv.user);
+      return { ...rv, user: user ? { _id: user._id, name: user.name } : null };
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ success: true, reviews });
+});
+
+// ── Search route ──────────────────────────────────────────────────────────────
+app.get('/api/search', (req, res) => {
+  const { q = '', cuisine, sort = 'rating' } = req.query;
+  const term = String(q).trim().toLowerCase();
+
+  let restaurants = db.restaurants.filter((r) => {
+    if (r.isDeleted) return false;
+    if (cuisine && !r.cuisine.includes(cuisine)) return false;
+    if (term) {
+      return r.name.toLowerCase().includes(term) ||
+        (r.description || '').toLowerCase().includes(term) ||
+        r.location.city.toLowerCase().includes(term);
+    }
+    return true;
+  });
+
+  const sortMap = { rating: '-averageRating', delivery: 'deliveryTimeMinutes', price: 'name', popularity: '-createdAt' };
+  const sortKey = String(sortMap[sort] || '-averageRating');
+  const field = sortKey.replace('-', '');
+  const desc = sortKey.startsWith('-');
+  restaurants.sort((a, b) => {
+    const av = a[field] ?? 0;
+    const bv = b[field] ?? 0;
+    return desc ? (bv > av ? 1 : -1) : (av > bv ? 1 : -1);
+  });
+
+  const menuItems = term
+    ? db.menuItems.filter((m) => !m.isDeleted && m.name.toLowerCase().includes(term)).slice(0, 50)
+    : [];
+
+  res.json({ success: true, restaurants, menuItems });
+});
+
+// ── 404 handler ───────────────────────────────────────────────────────────────
+app.use((req, res) => res.status(404).json({ success: false, message: `Route not found: ${req.originalUrl}` }));
+
+// ── Start server ──────────────────────────────────────────────────────────────
+seedData().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    const ifaces = os.networkInterfaces();
+    let lanIp = '127.0.0.1';
+    for (const iface of Object.values(ifaces)) {
+      for (const addr of iface) {
+        if (addr.family === 'IPv4' && !addr.internal) { lanIp = addr.address; break; }
+      }
+    }
+    console.log('');
+    console.log('  ╔══════════════════════════════════════════╗');
+    console.log('  ║       BombayLane Demo Server             ║');
+    console.log('  ╠══════════════════════════════════════════╣');
+    console.log(`  ║  Local:   http://localhost:${PORT}           ║`);
+    console.log(`  ║  LAN:     http://${lanIp}:${PORT}       ║`);
+    console.log('  ╠══════════════════════════════════════════╣');
+    console.log('  ║  Demo credentials (password: Demo@1234) ║');
+    console.log('  ║  user@bombaylane.com   — customer        ║');
+    console.log('  ║  owner@bombaylane.com  — restaurant_owner║');
+    console.log('  ║  admin@bombaylane.com  — admin           ║');
+    console.log('  ╚══════════════════════════════════════════╝');
+    console.log('');
+  });
+});
