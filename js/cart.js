@@ -22,11 +22,11 @@ BombayLane.cart = {
     if (id) localStorage.setItem(CART_RESTAURANT_KEY, id);
   },
   add(item) {
-    // Warn and clear if switching restaurants
+    // If switching restaurants, clear the cart silently and notify
     const existing = this.getRestaurantId();
     if (existing && item.restaurantId && existing !== item.restaurantId) {
-      if (!window.confirm('Your cart has items from another restaurant. Clear it and start a new order?')) return;
       this.clear();
+      BombayLane.notify('Cart cleared — starting a new order');
     }
     if (item.restaurantId) this.setRestaurantId(item.restaurantId);
 

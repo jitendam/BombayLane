@@ -125,8 +125,6 @@ BombayLane.restaurants = {
     const menuList = document.getElementById('menu-list');
     if (!menuList) return;
 
-    const restaurantId = this._restaurantId;
-
     if (!items.length) {
       menuList.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>No items in this category</h3></div>';
       return;
@@ -135,12 +133,12 @@ BombayLane.restaurants = {
     menuList.innerHTML = items.map((item) => {
       const vegClass = item.isVegetarian ? 'badge-veg' : 'badge-nonveg';
       const vegLabel = item.isVegetarian ? 'Veg' : 'Non-Veg';
-      const safeId = BombayLane.escapeAttr(item._id);
-      const safeName = BombayLane.escapeAttr(item.name);
-      const safePrice = Number(item.price || 0);
-      const safeRId = BombayLane.escapeAttr(restaurantId || '');
       return `
-        <article class="menu-card fade-in">
+        <article class="menu-card fade-in"
+          data-item-id="${BombayLane.escapeAttr(item._id)}"
+          data-item-name="${BombayLane.escapeAttr(item.name)}"
+          data-item-price="${Number(item.price || 0)}"
+          data-restaurant-id="${BombayLane.escapeAttr(this._restaurantId || '')}">
           <img class="menu-card-img" src="https://picsum.photos/seed/${BombayLane.escapeAttr(item._id)}/400/200" alt="${BombayLane.escapeAttr(item.name)}" loading="lazy">
           <div class="menu-card-body">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
@@ -149,12 +147,26 @@ BombayLane.restaurants = {
             </div>
             <p class="menu-card-desc">${BombayLane.escapeHtml(item.description || '')}</p>
             <div class="menu-card-footer">
-              <span class="menu-card-price">₹${safePrice}</span>
-              <button class="btn btn-sm" onclick="BombayLane.cart.add({ id: '${safeId}', name: '${safeName}', price: ${safePrice}, restaurantId: '${safeRId}' })">+ Add</button>
+              <span class="menu-card-price">₹${Number(item.price || 0)}</span>
+              <button class="btn btn-sm add-to-cart-btn">+ Add</button>
             </div>
           </div>
         </article>`;
     }).join('');
+
+    // Use event delegation — no inline JS, no string-embedded data
+    menuList.querySelectorAll('.add-to-cart-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('[data-item-id]');
+        if (!card) return;
+        BombayLane.cart.add({
+          id: card.dataset.itemId,
+          name: card.dataset.itemName,
+          price: Number(card.dataset.itemPrice),
+          restaurantId: card.dataset.restaurantId
+        });
+      });
+    });
   },
 
   init() {
