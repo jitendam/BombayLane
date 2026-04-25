@@ -3,11 +3,33 @@
 BombayLane is a full-stack food ordering platform with secure authentication, restaurant/menu management, cart and checkout flows, order tracking, and review support.
 
 ## Tech Stack
-- **Backend:** Node.js, Express, MongoDB/Mongoose
+- **Backend:** Node.js, Express, MongoDB/Mongoose (production) / in-memory (demo)
 - **Security:** Helmet, CORS, rate limiting, input validation, sanitization
 - **Frontend:** HTML, CSS, vanilla JavaScript (mobile-first responsive UI)
 
-## Quick Start
+## 🚀 Demo Quick Start (no database required)
+
+```bash
+npm install
+npm run demo
+```
+
+Open **http://localhost:5000** in your browser.
+
+### Demo Accounts (password: `Demo@1234`)
+
+| Email | Role |
+|---|---|
+| `user@bombaylane.com` | Customer |
+| `owner@bombaylane.com` | Restaurant Owner |
+| `admin@bombaylane.com` | Admin |
+
+The demo server starts with 4 pre-seeded restaurants and 21 menu items. All data is held in memory — restarting the server resets it to the original seed data.
+
+---
+
+## Production Setup (MongoDB required)
+
 1. Install dependencies:
    ```bash
    npm install
