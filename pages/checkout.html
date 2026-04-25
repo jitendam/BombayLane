@@ -4,28 +4,164 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container">
-    <section class="card">
-      <h1>Checkout</h1>
-      <p class="muted">Payment integration prepared for Stripe.</p>
-      <div class="form-grid">
-        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
-        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
-        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/cart.html">← Back to Cart</a>
+    </nav>
+    <div class="nav-auth" id="nav-auth"></div>
+  </header>
+
+  <main class="container page-wrap">
+    <h1 class="section-title" style="margin-bottom:1.5rem">Checkout</h1>
+
+    <!-- Empty cart redirect -->
+    <div id="empty-warn" class="card hidden" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🛒</div>
+      <h2>Your cart is empty</h2>
+      <a class="btn btn-primary" href="/pages/restaurants.html" style="margin-top:1rem">Browse Restaurants</a>
+    </div>
+
+    <div id="checkout-content" class="grid hidden" style="grid-template-columns:1fr 340px;gap:1.5rem;align-items:start">
+      <!-- Left: form -->
+      <div class="stack" style="gap:1.25rem">
+        <!-- Delivery address -->
+        <div class="card">
+          <h2 style="margin-bottom:1rem">📍 Delivery Address</h2>
+          <div class="form-group">
+            <div>
+              <label class="label">Full address</label>
+              <textarea id="delivery-address" class="input" rows="3" placeholder="Flat no, Building, Street, City, PIN…"></textarea>
+            </div>
+            <div id="saved-address-wrap" class="hidden">
+              <label class="label">Or use saved address</label>
+              <button class="btn btn-secondary btn-sm" id="use-saved-btn">Use saved address</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment (demo) -->
+        <div class="card">
+          <h2 style="margin-bottom:.75rem">💳 Payment</h2>
+          <p class="small muted" style="margin-bottom:.75rem">This is a demo — no real payment is processed.</p>
+          <div class="stack" style="gap:.5rem">
+            <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
+              <input type="radio" name="payment" value="cod" checked> Cash on Delivery
+            </label>
+            <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;opacity:.5">
+              <input type="radio" name="payment" value="card" disabled> Credit / Debit Card (not available in demo)
+            </label>
+            <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;opacity:.5">
+              <input type="radio" name="payment" value="upi" disabled> UPI (not available in demo)
+            </label>
+          </div>
+        </div>
+
+        <button id="place-btn" class="btn btn-primary btn-lg btn-full">Place Order</button>
       </div>
-      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
-    </section>
+
+      <!-- Right: summary -->
+      <aside class="card" id="order-summary" style="position:sticky;top:80px"></aside>
+    </div>
+
+    <!-- Success state -->
+    <div id="success-state" class="card hidden" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🎉</div>
+      <h2>Order Placed!</h2>
+      <p class="muted">Your order has been received. Track it in real-time.</p>
+      <div style="display:flex;gap:.75rem;justify-content:center;margin-top:1.25rem">
+        <a class="btn btn-primary" id="track-link" href="/pages/orders.html">Track My Order</a>
+        <a class="btn btn-secondary" href="/pages/restaurants.html">Order More</a>
+      </div>
+    </div>
   </main>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/orders.js"></script>
-  <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script src="/js/nav.js"></script>
+  <script>
+    BombayLane.cart.updateCount();
+
+    const cart = BombayLane.cart.getItems();
+    if (!cart.length) {
+      document.getElementById('empty-warn').classList.remove('hidden');
+    } else {
+      document.getElementById('checkout-content').classList.remove('hidden');
+
+      // pre-fill saved address
+      const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
+      if (user.address) {
+        document.getElementById('saved-address-wrap').classList.remove('hidden');
+        document.getElementById('use-saved-btn').onclick = () => {
+          document.getElementById('delivery-address').value = user.address;
+        };
+      }
+
+      // render summary
+      const t = BombayLane.cart.totals();
+      const summary = document.getElementById('order-summary');
+      summary.innerHTML = `
+        <h3 style="margin-bottom:1rem">Order Summary</h3>
+        <ul class="list" style="margin-bottom:1rem">
+          ${cart.map((i) => `<li class="row small"><span>${BombayLane.escapeHtml(i.name)} × ${i.quantity}</span><strong>₹${(i.price*i.quantity).toFixed(0)}</strong></li>`).join('')}
+        </ul>
+        <hr style="border:none;border-top:1px solid var(--border);margin:.75rem 0">
+        <div class="stack" style="font-size:.9rem">
+          <div class="row"><span>Subtotal</span><strong>₹${t.subtotal.toFixed(2)}</strong></div>
+          <div class="row"><span>Tax (5%)</span><strong>₹${t.tax.toFixed(2)}</strong></div>
+          <div class="row"><span>Delivery</span><strong>${t.deliveryFee === 0 ? '<span style="color:var(--success)">Free</span>' : '₹'+t.deliveryFee}</strong></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">
+          <div class="row"><strong style="font-size:1.05rem">Total</strong><strong style="font-size:1.2rem;color:var(--brand)">₹${t.total.toFixed(2)}</strong></div>
+        </div>`;
+    }
+
+    document.getElementById('place-btn')?.addEventListener('click', async () => {
+      const token = localStorage.getItem('bl_token');
+      if (!token) { BombayLane.notify('Please login to place an order'); location.href = '/pages/auth.html'; return; }
+
+      const address = document.getElementById('delivery-address').value.trim();
+      if (!address) { BombayLane.notify('Please enter a delivery address'); return; }
+
+      const cartItems = BombayLane.cart.getItems();
+      if (!cartItems.length) { BombayLane.notify('Cart is empty'); return; }
+
+      // Get restaurant ID from first cart item
+      const restaurantId = cartItems[0].restaurantId;
+      if (!restaurantId) { BombayLane.notify('Restaurant info missing. Please add items from a restaurant page.'); return; }
+
+      const btn = document.getElementById('place-btn');
+      btn.disabled = true; btn.textContent = 'Placing order…';
+
+      try {
+        const res = await BombayLane.api.request('/api/orders', {
+          method: 'POST',
+          body: JSON.stringify({
+            restaurantId,
+            deliveryAddress: address,
+            items: cartItems.map((i) => ({ menuItemId: i.id, quantity: i.quantity }))
+          })
+        });
+        BombayLane.cart.clear();
+        BombayLane.cart.updateCount();
+        document.getElementById('checkout-content').classList.add('hidden');
+        const suc = document.getElementById('success-state');
+        suc.classList.remove('hidden');
+        const trackLink = document.getElementById('track-link');
+        if (trackLink) trackLink.href = '/pages/orders.html?track=' + encodeURIComponent(res.order.id);
+        BombayLane.notify('Order placed! 🎉');
+      } catch (e) {
+        BombayLane.notify(e.message);
+        btn.disabled = false; btn.textContent = 'Place Order';
+      }
+    });
+  </script>
 </body>
 </html>
+

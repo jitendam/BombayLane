@@ -4,34 +4,122 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Restaurants | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="/css/animations.css">
-  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html" class="active">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+    <div class="nav-auth" id="nav-auth"></div>
   </header>
-  <main class="container">
-    <section class="card form-grid">
-      <h1>Find restaurants</h1>
-      <input id="search-input" class="input" type="search" placeholder="Search by name, cuisine, or city">
-      <select id="cuisine-filter">
-        <option value="">All cuisines</option>
-        <option value="North Indian">North Indian</option>
-        <option value="South Indian">South Indian</option>
-        <option value="Street Food">Street Food</option>
-      </select>
-    </section>
-    <section id="restaurant-list" class="grid cols-3" aria-live="polite"></section>
+
+  <main class="container page-wrap">
+    <h1 class="section-title" style="margin-bottom:1.25rem">Find <span>Restaurants</span></h1>
+
+    <!-- Search + filter bar -->
+    <div class="card" style="margin-bottom:1.5rem;padding:1rem">
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+        <input id="search-input" class="input" type="search" placeholder="Search by name, cuisine or city…" style="flex:1;min-width:200px">
+        <select id="sort-select" class="input" style="width:auto">
+          <option value="rating">Top Rated</option>
+          <option value="time">Fastest Delivery</option>
+        </select>
+      </div>
+      <div class="filter-chips" style="margin-top:.75rem;margin-bottom:0">
+        <span class="chip active" data-cuisine="">All</span>
+        <span class="chip" data-cuisine="North Indian">🍲 North Indian</span>
+        <span class="chip" data-cuisine="South Indian">🥘 South Indian</span>
+        <span class="chip" data-cuisine="Mughlai">🍖 Mughlai</span>
+        <span class="chip" data-cuisine="Street Food">🥙 Street Food</span>
+      </div>
+    </div>
+
+    <div id="restaurant-list" class="grid cols-auto" aria-live="polite"></div>
+    <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
+    <p id="no-results" class="card muted hidden" style="text-align:center;padding:2rem">No restaurants found. Try a different search.</p>
   </main>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/restaurant.js"></script>
-  <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script src="/js/nav.js"></script>
+  <script>
+    BombayLane.cart.updateCount();
+    let activeCuisine = '';
+
+    // Read query param
+    const qParam = new URLSearchParams(location.search).get('q') || '';
+    if (qParam) document.getElementById('search-input').value = qParam;
+
+    async function fetchRestaurants() {
+      const q       = document.getElementById('search-input').value.trim();
+      const cuisine = activeCuisine;
+      const list    = document.getElementById('restaurant-list');
+      const loading = document.getElementById('loading');
+      const noRes   = document.getElementById('no-results');
+
+      list.innerHTML = '';
+      loading.style.display = 'flex';
+      noRes.classList.add('hidden');
+
+      try {
+        const url = `/api/search?q=${encodeURIComponent(q)}&cuisine=${encodeURIComponent(cuisine)}`;
+        const res = await BombayLane.api.request(url);
+        loading.style.display = 'none';
+        const sort = document.getElementById('sort-select').value;
+        const data = (res.restaurants || []).sort((a, b) =>
+          sort === 'time' ? (a.deliveryTimeMinutes || 30) - (b.deliveryTimeMinutes || 30)
+                          : b.averageRating - a.averageRating);
+        if (!data.length) { noRes.classList.remove('hidden'); return; }
+        data.forEach((r) => {
+          const open = r.isOpen !== false;
+          list.insertAdjacentHTML('beforeend', `
+            <article class="card restaurant-card card-hover fade-in">
+              <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(r.id)}/400/200" alt="${BombayLane.escapeAttr(r.name)}" loading="lazy"
+                   onclick="location.href='/pages/restaurant-detail.html?id=${encodeURIComponent(r.id)}'">
+              <div class="rc-body">
+                <div class="row" style="margin-bottom:.3rem">
+                  <h3>${BombayLane.escapeHtml(r.name)}</h3>
+                  <span class="badge ${open ? 'badge-open' : 'badge-closed'}">${open ? 'Open' : 'Closed'}</span>
+                </div>
+                <p class="small muted" style="margin-bottom:.5rem">${BombayLane.escapeHtml(r.description || '')}</p>
+                <div class="rc-tags">${(r.cuisine || []).map((c) => `<span class="tag">${BombayLane.escapeHtml(c)}</span>`).join('')}</div>
+                <div class="rc-meta">
+                  <span class="rating">★ ${Number(r.averageRating || 0).toFixed(1)}</span>
+                  <span>🕐 ${r.deliveryTimeMinutes || 30} mins</span>
+                  <span>📍 ${BombayLane.escapeHtml(r.location?.city || '')}</span>
+                </div>
+                <a class="btn btn-primary btn-full" style="margin-top:.75rem" href="/pages/restaurant-detail.html?id=${encodeURIComponent(r.id)}">View Menu</a>
+              </div>
+            </article>`);
+        });
+      } catch (e) {
+        loading.style.display = 'none';
+        BombayLane.notify(e.message);
+      }
+    }
+
+    const debouncedFetch = BombayLane.debounce(fetchRestaurants, 300);
+    document.getElementById('search-input').addEventListener('input', debouncedFetch);
+    document.getElementById('sort-select').addEventListener('change', fetchRestaurants);
+
+    document.querySelectorAll('.chip[data-cuisine]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        activeCuisine = chip.dataset.cuisine;
+        document.querySelectorAll('.chip[data-cuisine]').forEach((c) => c.classList.toggle('active', c === chip));
+        fetchRestaurants();
+      });
+    });
+
+    fetchRestaurants();
+  </script>
 </body>
 </html>
+

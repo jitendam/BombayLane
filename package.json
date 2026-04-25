@@ -4,7 +4,8 @@
   "description": "BombayLane food ordering platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node demo-server.js",
+    "demo": "node demo-server.js",
     "dev": "node server.js"
   },
   "dependencies": {

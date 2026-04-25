@@ -3,28 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders | BombayLane</title>
+  <title>My Orders | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container">
-    <section class="card">
-      <h1>Order History</h1>
-      <ul id="orders-list" class="list"></ul>
-    </section>
-    <section class="card">
-      <h2>Live order tracking</h2>
-      <p>Current status: <strong id="order-status">-</strong></p>
-      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
-    </section>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html" class="active">My Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+    <div class="nav-auth" id="nav-auth"></div>
+  </header>
+
+  <main class="container page-wrap">
+    <h1 class="section-title" style="margin-bottom:1.5rem">My <span>Orders</span></h1>
+
+    <!-- Live tracking panel -->
+    <div id="tracking-panel" class="card hidden" style="margin-bottom:1.5rem">
+      <div class="row" style="margin-bottom:1rem">
+        <h2>📦 Live Tracking</h2>
+        <button class="btn btn-secondary btn-sm" onclick="closeTracking()">Close</button>
+      </div>
+      <p id="tracking-restaurant" class="muted small" style="margin-bottom:1rem"></p>
+      <div class="status-steps" id="status-steps">
+        <div class="status-step" data-status="placed">      <div class="dot">📋</div><span>Placed</span></div>
+        <div class="status-step" data-status="confirmed">   <div class="dot">✅</div><span>Confirmed</span></div>
+        <div class="status-step" data-status="preparing">   <div class="dot">👨‍🍳</div><span>Preparing</span></div>
+        <div class="status-step" data-status="out_for_delivery"><div class="dot">🚴</div><span>On the way</span></div>
+        <div class="status-step" data-status="delivered">   <div class="dot">🎉</div><span>Delivered</span></div>
+      </div>
+      <p id="tracking-eta" class="small muted center" style="margin-top:.75rem"></p>
+    </div>
+
+    <!-- Login gate -->
+    <div id="login-gate" class="card hidden" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+      <h2>Login to see your orders</h2>
+      <a class="btn btn-primary" href="/pages/auth.html" style="margin-top:1rem">Login / Register</a>
+    </div>
+
+    <!-- Orders list -->
+    <div id="orders-loading" class="loading-overlay"><div class="spinner"></div></div>
+    <div id="orders-list" class="stack" style="gap:1rem"></div>
+    <div id="orders-empty" class="card hidden" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🍽️</div>
+      <h2>No orders yet</h2>
+      <p class="muted">Your order history will appear here.</p>
+      <a class="btn btn-primary" href="/pages/restaurants.html" style="margin-top:1rem">Start Ordering</a>
+    </div>
   </main>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/orders.js"></script>
-  <script src="/js/main.js"></script>
-  <script>BombayLane.orders.loadHistory();</script>
+  <script src="/js/nav.js"></script>
+  <script>
+    BombayLane.cart.updateCount();
+
+    const STATUS_FLOW = ['placed','confirmed','preparing','out_for_delivery','delivered'];
+
+    function statusBadge(s) {
+      return `<span class="badge badge-${s}">${s.replace(/_/g,' ')}</span>`;
+    }
+
+    function renderOrders(orders) {
+      const list = document.getElementById('orders-list');
+      const empty = document.getElementById('orders-empty');
+      if (!orders.length) { empty.classList.remove('hidden'); return; }
+      list.innerHTML = orders.map((o) => `
+        <div class="card">
+          <div class="row" style="flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem">
+            <div>
+              <h3 style="margin-bottom:.2rem">${BombayLane.escapeHtml(o.restaurantName || o.restaurant || '')}</h3>
+              <span class="small muted">#${o.id.slice(-8)} · ${new Date(o.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+              ${statusBadge(o.status)}
+              <strong style="color:var(--brand)">₹${Number(o.total || 0).toFixed(2)}</strong>
+            </div>
+          </div>
+          <ul class="list" style="margin-bottom:.75rem">
+            ${(o.items || []).map((item) => `<li class="small text-2">${BombayLane.escapeHtml(item.name)} × ${item.quantity} — ₹${(item.price * item.quantity).toFixed(0)}</li>`).join('')}
+          </ul>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            ${!['delivered','cancelled'].includes(o.status) ? `<button class="btn btn-secondary btn-sm" onclick="trackOrder('${BombayLane.escapeAttr(o.id)}','${BombayLane.escapeAttr(o.restaurantName||'')}')">📍 Track</button>` : ''}
+            <button class="btn btn-secondary btn-sm" onclick="reorder('${BombayLane.escapeAttr(o.id)}')">🔁 Reorder</button>
+            ${!['delivered','cancelled'].includes(o.status) ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder('${BombayLane.escapeAttr(o.id)}')">Cancel</button>` : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    async function loadOrders() {
+      const token = localStorage.getItem('bl_token');
+      document.getElementById('orders-loading').style.display = 'none';
+      if (!token) { document.getElementById('login-gate').classList.remove('hidden'); return; }
+      document.getElementById('orders-loading').style.display = 'flex';
+      try {
+        const res = await BombayLane.api.request('/api/orders');
+        document.getElementById('orders-loading').style.display = 'none';
+        renderOrders(res.orders || []);
+      } catch (e) {
+        document.getElementById('orders-loading').style.display = 'none';
+        BombayLane.notify(e.message);
+      }
+    }
+
+    let trackingInterval;
+    async function trackOrder(orderId, restaurantName) {
+      clearInterval(trackingInterval);
+      const panel = document.getElementById('tracking-panel');
+      document.getElementById('tracking-restaurant').textContent = restaurantName ? 'Restaurant: ' + restaurantName : '';
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth' });
+      await refreshTracking(orderId);
+      trackingInterval = setInterval(() => refreshTracking(orderId), 8000);
+    }
+
+    async function refreshTracking(orderId) {
+      try {
+        const res = await BombayLane.api.request(`/api/orders/${orderId}`);
+        const status = res.order.status;
+        const steps  = document.querySelectorAll('.status-step');
+        const idx    = STATUS_FLOW.indexOf(status);
+        steps.forEach((s, i) => {
+          s.classList.toggle('done', i < idx);
+          s.classList.toggle('active', i === idx);
+        });
+        if (res.order.estimatedDeliveryAt) {
+          const eta = new Date(res.order.estimatedDeliveryAt);
+          document.getElementById('tracking-eta').textContent = status === 'delivered' ? '✅ Order delivered!' : `Estimated delivery: ${eta.toLocaleTimeString()}`;
+        }
+        if (['delivered','cancelled'].includes(status)) clearInterval(trackingInterval);
+      } catch(e) { /* ignore polling errors */ }
+    }
+
+    function closeTracking() {
+      clearInterval(trackingInterval);
+      document.getElementById('tracking-panel').classList.add('hidden');
+    }
+
+    async function reorder(orderId) {
+      try {
+        const res = await BombayLane.api.request(`/api/orders/${orderId}`);
+        (res.order.items || []).forEach((item) => {
+          BombayLane.cart.add({ id: item.menuItemId, name: item.name, price: item.price, restaurantId: res.order.restaurant });
+        });
+        BombayLane.notify('Items added to cart!');
+      } catch (e) { BombayLane.notify(e.message); }
+    }
+
+    async function cancelOrder(orderId) {
+      if (!confirm('Cancel this order?')) return;
+      try {
+        await BombayLane.api.request(`/api/orders/${orderId}/cancel`, { method: 'PUT', body: '{}' });
+        BombayLane.notify('Order cancelled');
+        loadOrders();
+      } catch (e) { BombayLane.notify(e.message); }
+    }
+
+    // Auto-track if redirect from checkout
+    const trackId = new URLSearchParams(location.search).get('track');
+
+    loadOrders().then(() => {
+      if (trackId) trackOrder(trackId, '');
+    });
+  </script>
 </body>
 </html>
+

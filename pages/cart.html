@@ -4,25 +4,115 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cart | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/checkout.html">Checkout</a></nav>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html" class="active">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+    <div class="nav-auth" id="nav-auth"></div>
   </header>
-  <main class="container grid" style="grid-template-columns:2fr 1fr;">
-    <section>
-      <h1>Your Cart</h1>
-      <ul id="cart-items" class="list"></ul>
-      <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear cart</button>
-    </section>
-    <aside class="card" id="cart-summary"></aside>
+
+  <main class="container page-wrap">
+    <h1 class="section-title" style="margin-bottom:1.25rem">Your <span>Cart</span></h1>
+
+    <div class="grid" style="grid-template-columns:1fr 340px;gap:1.5rem;align-items:start" id="cart-layout">
+      <div>
+        <ul id="cart-items" class="list"></ul>
+        <div style="margin-top:1rem;display:flex;gap:.75rem" id="cart-actions" class="hidden">
+          <button class="btn btn-secondary" onclick="clearCart()">Clear Cart</button>
+          <a class="btn btn-primary" href="/pages/checkout.html">Proceed to Checkout →</a>
+        </div>
+        <div id="cart-empty" class="card hidden" style="text-align:center;padding:3rem">
+          <div style="font-size:3rem;margin-bottom:1rem">🛒</div>
+          <h2>Your cart is empty</h2>
+          <p class="muted">Browse restaurants and add items to get started.</p>
+          <a class="btn btn-primary" href="/pages/restaurants.html" style="margin-top:1rem">Browse Restaurants</a>
+        </div>
+      </div>
+
+      <aside class="card" id="cart-summary" style="position:sticky;top:80px"></aside>
+    </div>
   </main>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    function renderCartPage() {
+      const cart = BombayLane.cart.getItems();
+      const list    = document.getElementById('cart-items');
+      const summary = document.getElementById('cart-summary');
+      const empty   = document.getElementById('cart-empty');
+      const actions = document.getElementById('cart-actions');
+
+      BombayLane.cart.updateCount();
+
+      if (!cart.length) {
+        list.innerHTML = '';
+        summary.innerHTML = '';
+        empty.classList.remove('hidden');
+        actions.classList.add('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      actions.classList.remove('hidden');
+
+      list.innerHTML = cart.map((item) => `
+        <li class="card" style="display:flex;gap:1rem;align-items:center">
+          <div style="flex:1">
+            <strong>${BombayLane.escapeHtml(item.name)}</strong>
+            <p class="muted small" style="margin:0">₹${Number(item.price)} each</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <button class="btn btn-secondary btn-sm" onclick="adj('${BombayLane.escapeAttr(item.id)}',-1)">−</button>
+            <strong style="min-width:1.5rem;text-align:center">${item.quantity}</strong>
+            <button class="btn btn-secondary btn-sm" onclick="adj('${BombayLane.escapeAttr(item.id)}',1)">+</button>
+          </div>
+          <div style="min-width:60px;text-align:right">
+            <strong>₹${Number(item.price * item.quantity).toFixed(0)}</strong>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="BombayLane.cart.remove('${BombayLane.escapeAttr(item.id)}'); renderCartPage();">✕</button>
+        </li>`).join('');
+
+      const t = BombayLane.cart.totals();
+      summary.innerHTML = `
+        <h3 style="margin-bottom:1rem">Order Summary</h3>
+        <div class="stack" style="font-size:.9rem">
+          <div class="row"><span>Subtotal</span><strong>₹${t.subtotal.toFixed(2)}</strong></div>
+          <div class="row"><span>Tax (5%)</span><strong>₹${t.tax.toFixed(2)}</strong></div>
+          <div class="row"><span>Delivery</span><strong>${t.deliveryFee === 0 ? '<span style="color:var(--success)">Free</span>' : '₹' + t.deliveryFee}</strong></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">
+          <div class="row"><strong style="font-size:1.05rem">Total</strong><strong style="font-size:1.2rem;color:var(--brand)">₹${t.total.toFixed(2)}</strong></div>
+        </div>
+        <a class="btn btn-primary btn-full" href="/pages/checkout.html" style="margin-top:1rem">Proceed to Checkout →</a>
+        ${t.deliveryFee > 0 ? `<p class="small muted" style="margin-top:.75rem;text-align:center">Add ₹${(500 - t.subtotal).toFixed(0)} more for free delivery</p>` : ''}`;
+    }
+
+    function adj(id, delta) {
+      const cart = BombayLane.cart.getItems();
+      const entry = cart.find((x) => x.id === id);
+      if (!entry) return;
+      if (entry.quantity + delta <= 0) BombayLane.cart.remove(id);
+      else BombayLane.cart.updateQuantity(id, entry.quantity + delta);
+      renderCartPage();
+    }
+
+    function clearCart() {
+      BombayLane.cart.clear();
+      renderCartPage();
+    }
+
+    renderCartPage();
+  </script>
 </body>
 </html>
+

@@ -3,39 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth | BombayLane</title>
+  <title>Login | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container grid cols-3" style="grid-template-columns:1fr 1fr;">
-    <section class="card">
-      <h1>Login</h1>
-      <form id="login-form" class="form-grid" novalidate>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <button class="btn" type="submit">Login</button>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+  </header>
+
+  <main class="container-sm page-wrap">
+    <!-- Demo credentials banner -->
+    <div class="demo-banner">
+      <h4>🎯 Demo Accounts — click to auto-fill (password: Demo@1234)</h4>
+      <div class="demo-cred-list">
+        <div class="demo-cred" onclick="fillCred('user@bombaylane.com','Demo@1234')">
+          <strong>👤 Customer</strong>user@bombaylane.com
+        </div>
+        <div class="demo-cred" onclick="fillCred('owner@bombaylane.com','Demo@1234')">
+          <strong>👨‍🍳 Owner</strong>owner@bombaylane.com
+        </div>
+        <div class="demo-cred" onclick="fillCred('admin@bombaylane.com','Demo@1234')">
+          <strong>👑 Admin</strong>admin@bombaylane.com
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex" style="margin-bottom:1.5rem;gap:.5rem">
+      <button class="btn btn-primary" id="tab-login"    onclick="switchTab('login')">Login</button>
+      <button class="btn btn-secondary" id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Login -->
+    <section class="card fade-in" id="panel-login">
+      <h2 style="margin-bottom:1rem">Welcome back 👋</h2>
+      <form id="login-form" class="form-group" novalidate>
+        <div>
+          <label class="label">Email</label>
+          <input class="input" type="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label class="label">Password</label>
+          <input class="input" type="password" name="password" placeholder="Enter password" required>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit" id="login-btn">Login</button>
       </form>
+      <p class="small muted" style="margin-top:1rem;text-align:center">Don't have an account? <a href="#" onclick="switchTab('register')">Register →</a></p>
     </section>
-    <section class="card">
-      <h1>Register</h1>
-      <form id="register-form" class="form-grid" novalidate>
-        <input class="input" type="text" name="name" placeholder="Name" minlength="2" required>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <select name="role"><option value="customer">Customer</option><option value="restaurant_owner">Restaurant Owner</option></select>
-        <input class="input" type="text" name="phone" placeholder="Phone">
-        <textarea class="input" name="address" placeholder="Address"></textarea>
-        <button class="btn" type="submit">Create account</button>
+
+    <!-- Register -->
+    <section class="card fade-in hidden" id="panel-register">
+      <h2 style="margin-bottom:1rem">Create an account</h2>
+      <form id="register-form" class="form-group" novalidate>
+        <div>
+          <label class="label">Full Name</label>
+          <input class="input" type="text" name="name" placeholder="Your name" minlength="2" required>
+        </div>
+        <div>
+          <label class="label">Email</label>
+          <input class="input" type="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label class="label">Password <span class="small muted">(min 8 chars, upper+lower+number+symbol)</span></label>
+          <input class="input" type="password" name="password" placeholder="Strong password" required>
+        </div>
+        <div>
+          <label class="label">Account type</label>
+          <select name="role" class="input">
+            <option value="customer">Customer</option>
+            <option value="restaurant_owner">Restaurant Owner</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Phone <span class="small muted">(optional)</span></label>
+          <input class="input" type="tel" name="phone" placeholder="+91 9000 000 000">
+        </div>
+        <div>
+          <label class="label">Address <span class="small muted">(optional)</span></label>
+          <textarea class="input" name="address" placeholder="Your delivery address"></textarea>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit" id="register-btn">Create Account</button>
       </form>
-      <button id="logout-btn" class="btn btn-secondary" style="margin-top:1rem">Logout</button>
+      <p class="small muted" style="margin-top:1rem;text-align:center">Already have an account? <a href="#" onclick="switchTab('login')">Login →</a></p>
     </section>
   </main>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
-  <script src="/js/auth.js"></script>
-  <script src="/js/main.js"></script>
-  <script>BombayLane.auth.init();</script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    BombayLane.cart.updateCount();
+
+    function switchTab(tab) {
+      document.getElementById('panel-login').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('panel-register').classList.toggle('hidden', tab !== 'register');
+      document.getElementById('tab-login').className    = 'btn ' + (tab === 'login'    ? 'btn-primary' : 'btn-secondary');
+      document.getElementById('tab-register').className = 'btn ' + (tab === 'register' ? 'btn-primary' : 'btn-secondary');
+    }
+
+    function fillCred(email, password) {
+      document.querySelector('#login-form [name=email]').value    = email;
+      document.querySelector('#login-form [name=password]').value = password;
+      switchTab('login');
+    }
+
+    const passwordStrong = (v) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(v);
+
+    const setAuth = (token, user) => {
+      localStorage.setItem('bl_token', token);
+      localStorage.setItem('bl_user', JSON.stringify(user));
+    };
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.textContent = 'Logging in…';
+      const form = e.target;
+      try {
+        const res = await BombayLane.api.request('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: form.email.value.trim(), password: form.password.value })
+        });
+        setAuth(res.token, res.user);
+        BombayLane.notify('Logged in! Redirecting…');
+        setTimeout(() => { location.href = res.user.role === 'admin' ? '/admin/index.html' : '/pages/restaurants.html'; }, 800);
+      } catch (err) {
+        BombayLane.notify(err.message);
+        btn.disabled = false; btn.textContent = 'Login';
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('register-btn');
+      const form = e.target;
+      if (!passwordStrong(form.password.value)) {
+        BombayLane.notify('Password needs uppercase, lowercase, number & symbol (8+ chars).');
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Creating…';
+      try {
+        const res = await BombayLane.api.request('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ name: form.name.value.trim(), email: form.email.value.trim(), password: form.password.value, role: form.role.value, phone: form.phone.value.trim(), address: form.address.value.trim() })
+        });
+        setAuth(res.token, res.user);
+        BombayLane.notify('Account created! Redirecting…');
+        setTimeout(() => { location.href = '/pages/restaurants.html'; }, 800);
+      } catch (err) {
+        BombayLane.notify(err.message);
+        btn.disabled = false; btn.textContent = 'Create Account';
+      }
+    });
+  </script>
 </body>
 </html>
+

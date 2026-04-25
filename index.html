@@ -4,51 +4,139 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BombayLane | Food Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="/css/animations.css">
-  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
+  <!-- NAV -->
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
     <nav class="nav-links" aria-label="Primary">
       <a href="/pages/restaurants.html">Restaurants</a>
-      <a href="/pages/orders.html">Orders</a>
-      <a href="/pages/profile.html">Profile</a>
-      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
     </nav>
+    <div class="nav-auth" id="nav-auth">
+      <a href="/pages/auth.html" class="btn btn-ghost btn-sm">Login</a>
+    </div>
   </header>
 
-  <main class="container">
-    <section class="hero card fade-in">
-      <h1>Order authentic meals in minutes</h1>
-      <p>Search restaurants, add favorites to cart, and track every step from kitchen to doorstep.</p>
-      <div class="actions">
-        <a class="btn" href="/pages/restaurants.html">Start Ordering</a>
-        <a class="btn btn-secondary" href="/pages/auth.html">Login / Register</a>
-      </div>
-    </section>
+  <main>
+    <!-- HERO -->
+    <div class="container" style="padding-top:2rem">
+      <section class="hero fade-in">
+        <h1>Crave it. Order it.<br>Get it fast. 🍛</h1>
+        <p>Discover the best restaurants near you and get authentic meals delivered in minutes.</p>
+        <div class="hero-search">
+          <input id="hero-search" type="search" placeholder="Search restaurant or cuisine…" autocomplete="off">
+          <button class="btn btn-primary" onclick="goSearch()">Search</button>
+        </div>
+      </section>
+    </div>
 
-    <section class="grid cols-3" aria-label="Quick actions">
-      <article class="card">
-        <h2>Explore Restaurants</h2>
-        <p>Filter by cuisine, ratings, and delivery time.</p>
-      </article>
-      <article class="card">
-        <h2>Live Tracking</h2>
-        <p>Follow order status in real time from placed to delivered.</p>
-      </article>
-      <article class="card">
-        <h2>Secure Checkout</h2>
-        <p>Validated checkout flow with taxes and delivery fee calculation.</p>
-      </article>
-    </section>
+    <!-- CATEGORIES -->
+    <div class="container page-wrap" style="padding-top:2rem;padding-bottom:0">
+      <h2 class="section-title">Browse by <span>Cuisine</span></h2>
+      <div class="filter-chips">
+        <span class="chip active" onclick="setCuisine('')">All</span>
+        <span class="chip" onclick="setCuisine('North Indian')">🍲 North Indian</span>
+        <span class="chip" onclick="setCuisine('South Indian')">🥘 South Indian</span>
+        <span class="chip" onclick="setCuisine('Mughlai')">🍖 Mughlai</span>
+        <span class="chip" onclick="setCuisine('Street Food')">🥙 Street Food</span>
+      </div>
+    </div>
+
+    <!-- FEATURED RESTAURANTS -->
+    <div class="container page-wrap" style="padding-top:.5rem">
+      <div class="row" style="margin-bottom:1rem">
+        <h2 class="section-title" style="margin:0">Top <span>Restaurants</span></h2>
+        <a href="/pages/restaurants.html" class="btn btn-secondary btn-sm">View all →</a>
+      </div>
+      <div id="featured-list" class="grid cols-auto"></div>
+      <div id="featured-loading" class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="container page-wrap">
+      <h2 class="section-title center">How it <span>Works</span></h2>
+      <div class="grid cols-3" style="text-align:center;gap:1.5rem;margin-top:1rem">
+        <div class="card">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🔍</div>
+          <h3>Find a Restaurant</h3>
+          <p class="muted small">Browse hundreds of restaurants. Filter by cuisine, rating, or delivery time.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🛒</div>
+          <h3>Add to Cart</h3>
+          <p class="muted small">Pick your favourite dishes, customise quantities and review your order.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🚴</div>
+          <h3>Live Tracking</h3>
+          <p class="muted small">Track your order from kitchen to doorstep with real-time status updates.</p>
+        </div>
+      </div>
+    </div>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    function goSearch() {
+      const q = document.getElementById('hero-search').value.trim();
+      location.href = '/pages/restaurants.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+    document.getElementById('hero-search').addEventListener('keydown', (e) => { if (e.key === 'Enter') goSearch(); });
+
+    let activeCuisine = '';
+    function setCuisine(c) {
+      activeCuisine = c;
+      document.querySelectorAll('.chip').forEach((ch) => ch.classList.toggle('active', ch.textContent.includes(c) && c !== '' || (c === '' && ch.textContent === 'All')));
+      loadFeatured();
+    }
+
+    async function loadFeatured() {
+      const list = document.getElementById('featured-list');
+      const loading = document.getElementById('featured-loading');
+      list.innerHTML = '';
+      loading.style.display = 'flex';
+      try {
+        const url = '/api/search' + (activeCuisine ? '?cuisine=' + encodeURIComponent(activeCuisine) : '');
+        const res = await BombayLane.api.request(url);
+        loading.style.display = 'none';
+        (res.restaurants || []).slice(0, 8).forEach((r) => {
+          const open = r.isOpen !== false;
+          list.insertAdjacentHTML('beforeend', `
+            <article class="card restaurant-card card-hover fade-in" onclick="location.href='/pages/restaurant-detail.html?id=${encodeURIComponent(r.id)}'">
+              <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(r.id)}/400/200" alt="${BombayLane.escapeAttr(r.name)}" loading="lazy">
+              <div class="rc-body">
+                <div class="row" style="margin-bottom:.3rem">
+                  <h3>${BombayLane.escapeHtml(r.name)}</h3>
+                  <span class="badge ${open ? 'badge-open' : 'badge-closed'}">${open ? 'Open' : 'Closed'}</span>
+                </div>
+                <div class="rc-tags">${(r.cuisine || []).map((c) => `<span class="tag">${BombayLane.escapeHtml(c)}</span>`).join('')}</div>
+                <div class="rc-meta">
+                  <span class="rating">★ ${Number(r.averageRating || 0).toFixed(1)}</span>
+                  <span>🕐 ${r.deliveryTimeMinutes || 30} mins</span>
+                  <span>📍 ${BombayLane.escapeHtml(r.location?.city || '')}</span>
+                </div>
+              </div>
+            </article>`);
+        });
+        if (!res.restaurants?.length) list.innerHTML = '<p class="muted card">No restaurants found.</p>';
+      } catch(e) {
+        loading.style.display = 'none';
+        list.innerHTML = `<p class="muted card">${BombayLane.escapeHtml(e.message)}</p>`;
+      }
+    }
+
+    loadFeatured();
+    BombayLane.cart.updateCount();
+  </script>
 </body>
 </html>
+

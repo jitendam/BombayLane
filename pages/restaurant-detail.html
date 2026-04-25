@@ -3,27 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant Detail | BombayLane</title>
+  <title>Restaurant | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <style>
+    .menu-cat-title { font-weight: 800; font-size: 1.1rem; margin: 1.5rem 0 .75rem; padding-bottom: .4rem; border-bottom: 2px solid var(--border); color: var(--brand); }
+    .menu-item { display: flex; gap: 1rem; align-items: center; padding: .9rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); transition: var(--transition); }
+    .menu-item:hover { box-shadow: var(--shadow); }
+    .menu-item-info { flex: 1; }
+    .menu-item-info h4 { margin-bottom: .2rem; }
+    .menu-item-info p  { font-size: .82rem; color: var(--muted); margin: 0; }
+    .menu-item-price { font-weight: 800; color: var(--brand); font-size: 1rem; white-space: nowrap; }
+    .qty-ctrl { display: flex; align-items: center; gap: .4rem; }
+    .qty-ctrl button { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--brand); background: transparent; color: var(--brand); font-weight: 700; cursor: pointer; font-size: .9rem; line-height: 1; }
+    .qty-ctrl span { min-width: 1.2rem; text-align: center; font-weight: 700; }
+    .restaurant-hero { position: relative; height: 220px; background: linear-gradient(135deg,#d9480f,#f97316); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.5rem; }
+    .restaurant-hero img { width: 100%; height: 100%; object-fit: cover; opacity: .7; }
+    .restaurant-hero-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; background: linear-gradient(transparent, rgba(0,0,0,.7)); color: #fff; }
+    .restaurant-hero-info h1 { color: #fff; margin-bottom: .25rem; }
+    .restaurant-hero-meta { display: flex; gap: 1rem; font-size: .85rem; opacity: .92; flex-wrap: wrap; }
+    .sticky-cart { position: sticky; bottom: 1rem; margin-top: 1.5rem; }
+  </style>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+    <div class="nav-auth" id="nav-auth"></div>
   </header>
-  <main class="container">
-    <section class="card">
-      <h1 id="restaurant-name">Restaurant</h1>
-      <p id="restaurant-meta" class="muted">Loading...</p>
-    </section>
-    <ul id="menu-list" class="list"></ul>
+
+  <main class="container page-wrap">
+    <div id="detail-loading" class="loading-overlay"><div class="spinner"></div></div>
+
+    <div id="detail-content" class="hidden">
+      <!-- Restaurant hero -->
+      <div class="restaurant-hero">
+        <img id="r-img" src="" alt="">
+        <div class="restaurant-hero-info">
+          <h1 id="r-name">Loading…</h1>
+          <div class="restaurant-hero-meta">
+            <span id="r-status"></span>
+            <span>★ <span id="r-rating"></span></span>
+            <span>🕐 <span id="r-time"></span> mins</span>
+            <span>📍 <span id="r-city"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category filter -->
+      <div class="filter-chips" id="cat-chips"></div>
+
+      <!-- Menu list -->
+      <div id="menu-list"></div>
+    </div>
   </main>
+
+  <!-- Floating cart summary -->
+  <div id="cart-float" class="hidden" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:50">
+    <a href="/pages/cart.html" class="btn btn-primary btn-lg" style="box-shadow:var(--shadow-lg)">
+      🛒 View Cart · <span id="cart-count-float">0</span> items
+    </a>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
-  <script src="/js/restaurant.js"></script>
-  <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script src="/js/nav.js"></script>
+  <script>
+    BombayLane.cart.updateCount();
+    const restaurantId = new URLSearchParams(location.search).get('id');
+
+    function renderQty(itemId) {
+      const cart = BombayLane.cart.getItems();
+      const entry = cart.find((x) => x.id === itemId);
+      const qty = entry ? entry.quantity : 0;
+      if (qty === 0) {
+        return `<button class="btn btn-primary btn-sm" onclick="addItem('${BombayLane.escapeAttr(itemId)}')">Add +</button>`;
+      }
+      return `<div class="qty-ctrl">
+        <button onclick="changeQty('${BombayLane.escapeAttr(itemId)}',-1)">−</button>
+        <span>${qty}</span>
+        <button onclick="changeQty('${BombayLane.escapeAttr(itemId)}',1)">+</button>
+      </div>`;
+    }
+
+    let menuData = [];
+    function addItem(id) {
+      const item = menuData.find((m) => m.id === id);
+      if (!item) return;
+      BombayLane.cart.add({ id: item.id, name: item.name, price: item.price, restaurantId });
+      rerenderMenuItem(id);
+      updateCartFloat();
+    }
+    function changeQty(id, delta) {
+      const cart = BombayLane.cart.getItems();
+      const entry = cart.find((x) => x.id === id);
+      if (!entry) { if (delta > 0) addItem(id); return; }
+      const newQty = entry.quantity + delta;
+      if (newQty <= 0) BombayLane.cart.remove(id);
+      else BombayLane.cart.updateQuantity(id, newQty);
+      rerenderMenuItem(id);
+      updateCartFloat();
+    }
+    function rerenderMenuItem(id) {
+      const el = document.getElementById('ctrl-' + id);
+      if (el) el.innerHTML = renderQty(id);
+    }
+    function updateCartFloat() {
+      const total = BombayLane.cart.getItems().reduce((s, i) => s + i.quantity, 0);
+      const f = document.getElementById('cart-float');
+      const c = document.getElementById('cart-count-float');
+      if (c) c.textContent = total;
+      if (f) f.classList.toggle('hidden', total === 0);
+      BombayLane.cart.updateCount();
+    }
+
+    let activeCategory = '';
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.chip[data-cat]').forEach((c) => c.classList.toggle('active', c.dataset.cat === cat));
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const list = document.getElementById('menu-list');
+      const items = activeCategory ? menuData.filter((m) => m.category === activeCategory) : menuData;
+      if (!items.length) { list.innerHTML = '<p class="muted card">No items found.</p>'; return; }
+
+      const byCategory = {};
+      items.forEach((m) => { (byCategory[m.category] = byCategory[m.category] || []).push(m); });
+
+      list.innerHTML = Object.entries(byCategory).map(([cat, catItems]) => `
+        <div class="menu-cat-title">${BombayLane.escapeHtml(cat)}</div>
+        <div class="stack" style="gap:.6rem">
+          ${catItems.map((item) => `
+            <div class="menu-item fade-in">
+              <span class="${item.isVeg ? 'veg-dot' : 'nonveg-dot'}" title="${item.isVeg ? 'Veg' : 'Non-veg'}"></span>
+              <div class="menu-item-info">
+                <h4>${BombayLane.escapeHtml(item.name)}</h4>
+                <p>${BombayLane.escapeHtml(item.description || '')}</p>
+              </div>
+              <div>
+                <div class="menu-item-price">₹${Number(item.price)}</div>
+                <div id="ctrl-${BombayLane.escapeAttr(item.id)}" style="margin-top:.4rem">${renderQty(item.id)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    async function loadDetail() {
+      if (!restaurantId) { location.href = '/pages/restaurants.html'; return; }
+      try {
+        const [rRes, mRes] = await Promise.all([
+          BombayLane.api.request(`/api/restaurants/${restaurantId}`),
+          BombayLane.api.request(`/api/restaurants/${restaurantId}/menu`)
+        ]);
+        const r = rRes.restaurant;
+        document.getElementById('detail-loading').style.display = 'none';
+        document.getElementById('detail-content').classList.remove('hidden');
+
+        document.title = r.name + ' | BombayLane';
+        document.getElementById('r-img').src = `https://picsum.photos/seed/${BombayLane.escapeAttr(r.id)}/1200/400`;
+        document.getElementById('r-img').alt = r.name;
+        document.getElementById('r-name').textContent    = r.name;
+        document.getElementById('r-rating').textContent  = Number(r.averageRating || 0).toFixed(1);
+        document.getElementById('r-time').textContent    = r.deliveryTimeMinutes || 30;
+        document.getElementById('r-city').textContent    = r.location?.city || '';
+        const openEl = document.getElementById('r-status');
+        openEl.innerHTML = r.isOpen !== false
+          ? '<span class="badge badge-open">Open</span>'
+          : '<span class="badge badge-closed">Closed</span>';
+
+        menuData = mRes.items || [];
+        const cats = [...new Set(menuData.map((m) => m.category))];
+        const chips = document.getElementById('cat-chips');
+        chips.innerHTML = `<span class="chip active" data-cat="" onclick="filterCategory('')">All</span>` +
+          cats.map((c) => `<span class="chip" data-cat="${BombayLane.escapeAttr(c)}" onclick="filterCategory('${BombayLane.escapeAttr(c)}')">${BombayLane.escapeHtml(c)}</span>`).join('');
+
+        renderMenu();
+        updateCartFloat();
+      } catch (e) {
+        document.getElementById('detail-loading').style.display = 'none';
+        BombayLane.notify(e.message);
+      }
+    }
+
+    loadDetail();
+  </script>
 </body>
 </html>
+

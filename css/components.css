@@ -1,46 +1,5 @@
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: .75rem;
-  padding: 1rem;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
-}
+/* components.css – kept minimal; all tokens live in style.css */
+/* Legacy shims so old HTML still works */
+.form-grid { display: grid; gap: .75rem; }
+.page-center { display: grid; place-items: center; min-height: 60vh; }
 
-.btn {
-  border: 0;
-  border-radius: .55rem;
-  background: var(--brand);
-  color: #fff;
-  padding: .6rem .9rem;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .35rem;
-}
-.btn:hover { background: var(--brand-dark); }
-.btn:disabled { opacity: .6; cursor: not-allowed; }
-.btn-secondary { background: #374151; }
-.pill {
-  display: inline-flex;
-  min-width: 1.2rem;
-  justify-content: center;
-  border-radius: 999px;
-  background: #111827;
-  color: white;
-  padding: .15rem .45rem;
-  font-size: .75rem;
-}
-.badge { font-size: .75rem; padding: .2rem .5rem; border-radius: .4rem; background: #fef3c7; }
-.rating { color: #f59e0b; font-weight: 700; }
-.spinner {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 3px solid #e5e7eb;
-  border-top-color: var(--brand);
-  animation: spin 1s linear infinite;
-  margin: 1rem auto;
-}
