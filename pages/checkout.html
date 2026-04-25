@@ -6,26 +6,67 @@
   <title>Checkout | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/cart.html">← Back to Cart</a>
+    </nav>
+  </header>
   <main class="container">
-    <section class="card">
-      <h1>Checkout</h1>
-      <p class="muted">Payment integration prepared for Stripe.</p>
-      <div class="form-grid">
-        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
-        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
-        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
-      </div>
-      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
-    </section>
+    <h1 style="margin:0 0 1.5rem;font-size:1.5rem;font-weight:800">Checkout</h1>
+    <div class="grid" style="grid-template-columns:1.4fr 1fr;gap:1.5rem">
+      <!-- Delivery form -->
+      <section class="card">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:700">Delivery Details</h2>
+        <div class="form-grid">
+          <div>
+            <label class="label" for="delivery-address">Delivery Address</label>
+            <textarea id="delivery-address" class="input" rows="3" placeholder="Enter your full delivery address" required></textarea>
+          </div>
+          <div>
+            <label class="label" for="delivery-name">Name</label>
+            <input id="delivery-name" class="input" type="text" placeholder="Your name">
+          </div>
+          <div>
+            <label class="label" for="delivery-phone">Phone</label>
+            <input id="delivery-phone" class="input" type="tel" placeholder="10-digit mobile number">
+          </div>
+          <div id="checkout-error" class="hidden" style="background:#FFF0F0;border:1px solid #FFCDD2;color:#C62828;padding:.75rem;border-radius:.5rem;font-size:.9rem"></div>
+          <button class="btn btn-full btn-lg" id="place-order-btn" onclick="BombayLane.orders.placeOrder()">Place Order 🍛</button>
+          <p class="muted" style="text-align:center;font-size:.82rem;margin:-.25rem 0 0">
+            You must be <a href="/pages/auth.html" style="color:var(--brand)">logged in</a> to place an order
+          </p>
+        </div>
+      </section>
+
+      <!-- Order summary -->
+      <aside class="card" style="align-self:start;position:sticky;top:80px">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:700">Order Summary</h2>
+        <ul id="cart-items" class="list" style="margin-bottom:1rem"></ul>
+        <div id="cart-summary"></div>
+      </aside>
+    </div>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script>
+    BombayLane.cart.render('cart-items', 'cart-summary');
+    // Pre-fill address from profile if available
+    try {
+      const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+      if (user) {
+        if (user.address) document.getElementById('delivery-address').value = user.address;
+        if (user.name) document.getElementById('delivery-name').value = user.name;
+        if (user.phone) document.getElementById('delivery-phone').value = user.phone;
+      }
+    } catch (_) {}
+  </script>
 </body>
 </html>

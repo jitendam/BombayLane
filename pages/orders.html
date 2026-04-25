@@ -3,22 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders | BombayLane</title>
+  <title>My Orders | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Menu</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+  </header>
   <main class="container">
-    <section class="card">
-      <h1>Order History</h1>
-      <ul id="orders-list" class="list"></ul>
-    </section>
-    <section class="card">
-      <h2>Live order tracking</h2>
-      <p>Current status: <strong id="order-status">-</strong></p>
-      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
-    </section>
+    <h1 style="margin:0 0 1.25rem;font-size:1.5rem;font-weight:800">My Orders</h1>
+    <ul id="orders-list" class="list" aria-live="polite"></ul>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>

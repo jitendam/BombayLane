@@ -11,20 +11,27 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/auth.html" id="nav-auth">Login</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
   <main class="container">
-    <section class="card form-grid">
-      <h1>Find restaurants</h1>
-      <input id="search-input" class="input" type="search" placeholder="Search by name, cuisine, or city">
-      <select id="cuisine-filter">
-        <option value="">All cuisines</option>
-        <option value="North Indian">North Indian</option>
-        <option value="South Indian">South Indian</option>
-        <option value="Street Food">Street Food</option>
-      </select>
-    </section>
+    <div style="margin-bottom:1.25rem">
+      <h1 style="margin:0 0 1rem;font-size:1.5rem;font-weight:800">Choose your restaurant</h1>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <input id="search-input" class="input" type="search" placeholder="Search by name, cuisine, or city" style="max-width:360px">
+        <select id="cuisine-filter" style="width:auto;min-width:160px">
+          <option value="">All cuisines</option>
+          <option value="North Indian">North Indian</option>
+          <option value="South Indian">South Indian</option>
+          <option value="Street Food">Street Food</option>
+          <option value="Mughlai">Mughlai</option>
+        </select>
+      </div>
+    </div>
     <section id="restaurant-list" class="grid cols-3" aria-live="polite"></section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -32,6 +39,15 @@
   <script src="/js/cart.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script>
+    BombayLane.restaurants.init();
+    try {
+      const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+      if (user && user.name) {
+        const el = document.getElementById('nav-auth');
+        if (el) { el.textContent = user.name.split(' ')[0]; el.href = '/pages/profile.html'; }
+      }
+    } catch (_) {}
+  </script>
 </body>
 </html>

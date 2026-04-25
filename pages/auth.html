@@ -3,39 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth | BombayLane</title>
+  <title>Login | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container grid cols-3" style="grid-template-columns:1fr 1fr;">
-    <section class="card">
-      <h1>Login</h1>
-      <form id="login-form" class="form-grid" novalidate>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <button class="btn" type="submit">Login</button>
-      </form>
-    </section>
-    <section class="card">
-      <h1>Register</h1>
-      <form id="register-form" class="form-grid" novalidate>
-        <input class="input" type="text" name="name" placeholder="Name" minlength="2" required>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <select name="role"><option value="customer">Customer</option><option value="restaurant_owner">Restaurant Owner</option></select>
-        <input class="input" type="text" name="phone" placeholder="Phone">
-        <textarea class="input" name="address" placeholder="Address"></textarea>
-        <button class="btn" type="submit">Create account</button>
-      </form>
-      <button id="logout-btn" class="btn btn-secondary" style="margin-top:1rem">Logout</button>
-    </section>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Menu</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+  </header>
+  <main class="container" style="max-width:900px">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <h1 style="margin:0 0 .3rem;font-size:1.6rem;font-weight:900">Welcome to BombayLane</h1>
+      <p class="muted" style="margin:0">Login or create an account to place orders</p>
+      <p class="muted" style="font-size:.82rem;margin:.4rem 0 0">
+        Demo: <code>user@bombaylane.com</code> / <code>Demo@1234</code>
+      </p>
+    </div>
+    <div class="grid cols-2" style="gap:1.5rem">
+      <section class="card">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:700">Login</h2>
+        <form id="login-form" class="form-grid" novalidate>
+          <div>
+            <label class="label">Email</label>
+            <input class="input" type="email" name="email" placeholder="your@email.com" required>
+          </div>
+          <div>
+            <label class="label">Password</label>
+            <input class="input" type="password" name="password" placeholder="Password" required>
+          </div>
+          <button class="btn btn-full" type="submit">Login</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:700">Create Account</h2>
+        <form id="register-form" class="form-grid" novalidate>
+          <div>
+            <label class="label">Name</label>
+            <input class="input" type="text" name="name" placeholder="Full name" minlength="2" required>
+          </div>
+          <div>
+            <label class="label">Email</label>
+            <input class="input" type="email" name="email" placeholder="your@email.com" required>
+          </div>
+          <div>
+            <label class="label">Password</label>
+            <input class="input" type="password" name="password" placeholder="Min 8 chars, upper+lower+num+symbol" required>
+          </div>
+          <div>
+            <label class="label">Account type</label>
+            <select name="role">
+              <option value="customer">Customer</option>
+              <option value="restaurant_owner">Restaurant Owner</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Phone (optional)</label>
+            <input class="input" type="tel" name="phone" placeholder="10-digit number">
+          </div>
+          <div>
+            <label class="label">Address (optional)</label>
+            <textarea class="input" name="address" rows="2" placeholder="Your delivery address"></textarea>
+          </div>
+          <button class="btn btn-full" type="submit">Create Account</button>
+        </form>
+      </section>
+    </div>
+    <div style="text-align:center;margin-top:1rem">
+      <button id="logout-btn" class="btn btn-secondary btn-sm" style="display:none">Logout</button>
+    </div>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.auth.init();</script>
+  <script>
+    BombayLane.auth.init();
+    // Show logout button if already logged in
+    try {
+      const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+      if (user) document.getElementById('logout-btn').style.display = 'inline-flex';
+    } catch (_) {}
+  </script>
 </body>
 </html>

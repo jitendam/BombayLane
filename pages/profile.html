@@ -6,19 +6,69 @@
   <title>Profile | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a><button id="theme-toggle" class="btn btn-secondary">Dark mode</button></header>
-  <main class="container">
-    <section class="card">
-      <h1>My Profile</h1>
-      <pre id="profile-data" class="muted"></pre>
-    </section>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Menu</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
+  </header>
+  <main class="container" style="max-width:680px">
+    <h1 style="margin:0 0 1.25rem;font-size:1.5rem;font-weight:800">My Profile</h1>
+    <div class="card" id="profile-card">
+      <p class="muted">Loading…</p>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap">
+      <a class="btn" href="/pages/orders.html">My Orders</a>
+      <button class="btn btn-secondary" id="logout-btn">Logout</button>
+    </div>
+    <p class="muted" style="margin-top:1rem;font-size:.85rem" id="not-logged-in" style="display:none">
+      <a href="/pages/auth.html" style="color:var(--brand)">Log in</a> to view your profile.
+    </p>
   </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
   <script src="/js/main.js"></script>
   <script>
-    const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
-    document.getElementById('profile-data').textContent = JSON.stringify(user, null, 2) || 'No user logged in';
+    (function () {
+      try {
+        const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+        const card = document.getElementById('profile-card');
+        if (!user) {
+          card.innerHTML = '<p>You are not logged in. <a href="/pages/auth.html" style="color:var(--brand)">Login here</a>.</p>';
+          return;
+        }
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;flex-shrink:0">
+              ${BombayLane.escapeHtml(user.name ? user.name[0].toUpperCase() : '?')}
+            </div>
+            <div>
+              <h2 style="margin:0;font-size:1.2rem">${BombayLane.escapeHtml(user.name || '')}</h2>
+              <p style="margin:0;color:var(--muted);font-size:.9rem">${BombayLane.escapeHtml(user.email || '')}</p>
+            </div>
+          </div>
+          <div style="display:grid;gap:.6rem">
+            ${user.phone ? `<p style="margin:0"><strong>Phone:</strong> ${BombayLane.escapeHtml(user.phone)}</p>` : ''}
+            ${user.address ? `<p style="margin:0"><strong>Address:</strong> ${BombayLane.escapeHtml(user.address)}</p>` : ''}
+            <p style="margin:0"><span class="badge badge-plain">${BombayLane.escapeHtml(user.role || 'customer')}</span></p>
+          </div>
+        `;
+      } catch (_) {}
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('bl_token');
+        localStorage.removeItem('bl_user');
+        BombayLane.notify('Logged out');
+        setTimeout(() => { window.location.href = '/pages/auth.html'; }, 800);
+      });
+    })();
   </script>
 </body>
 </html>

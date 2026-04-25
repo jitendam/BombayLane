@@ -6,19 +6,29 @@
   <title>Cart | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/checkout.html">Checkout</a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">← Menu</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
-  <main class="container grid" style="grid-template-columns:2fr 1fr;">
-    <section>
-      <h1>Your Cart</h1>
-      <ul id="cart-items" class="list"></ul>
-      <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear cart</button>
-    </section>
-    <aside class="card" id="cart-summary"></aside>
+  <main class="container">
+    <h1 style="margin:0 0 1.25rem;font-size:1.5rem;font-weight:800">Your Cart</h1>
+    <div class="grid" style="grid-template-columns:2fr 1fr;gap:1.5rem" id="cart-layout">
+      <section>
+        <ul id="cart-items" class="list"></ul>
+        <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">🗑 Clear Cart</button>
+          <a class="btn btn-sm" href="/pages/restaurants.html">+ Add More Items</a>
+        </div>
+      </section>
+      <aside class="card" id="cart-summary" style="align-self:start;position:sticky;top:80px"></aside>
+    </div>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
