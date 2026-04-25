@@ -6,19 +6,23 @@
   <title>Orders | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+      <a href="/pages/profile.html">Profile</a>
+    </nav>
+  </header>
   <main class="container">
-    <section class="card">
-      <h1>Order History</h1>
-      <ul id="orders-list" class="list"></ul>
-    </section>
-    <section class="card">
-      <h2>Live order tracking</h2>
-      <p>Current status: <strong id="order-status">-</strong></p>
-      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
-    </section>
+    <div class="row" style="margin-bottom:1rem">
+      <h1 style="margin:0">My Orders</h1>
+      <a href="/pages/restaurants.html" class="btn btn-secondary">Order Again</a>
+    </div>
+    <ul id="orders-list" class="list"></ul>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>

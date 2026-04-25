@@ -111,6 +111,18 @@ async function seedData () {
     }
   );
 
+  // Bombay Lanes restaurant (featured — based on just-eat.co.uk/restaurants-bombay-lanes-lower-edmonton)
+  const r5 = newId();
+  db.restaurants.push({
+    _id: r5, name: 'Bombay Lanes',
+    description: 'Award-winning Indian restaurant in Lower Edmonton serving authentic curries, grills and street food.',
+    cuisine: ['North Indian', 'Punjabi', 'Street Food'], owner: ownerId,
+    location: { address: '182 Fore Street, Lower Edmonton', city: 'London', coordinates: { lat: 51.62, lng: -0.07 } },
+    openingHours: { open: '12:00', close: '23:00' },
+    averageRating: 4.6, deliveryTimeMinutes: 40, isOpen: true, isDeleted: false, createdAt: new Date(),
+    featured: true
+  });
+
   // Menu items
   const items = [
     // Bombay Bites
@@ -137,7 +149,35 @@ async function seedData () {
     { restaurant: r4, name: 'Sarson da Saag', description: 'Mustard greens with makki di roti', category: 'Mains', price: 160, isVegetarian: true },
     { restaurant: r4, name: 'Butter Chicken', description: 'Tender chicken in creamy tomato sauce', category: 'Mains', price: 260, isVegetarian: false },
     { restaurant: r4, name: 'Lassi', description: 'Sweet chilled yogurt drink', category: 'Drinks', price: 70, isVegetarian: true },
-    { restaurant: r4, name: 'Chhole Bhature', description: 'Spicy chickpeas with fried bread', category: 'Mains', price: 140, isVegetarian: true }
+    { restaurant: r4, name: 'Chhole Bhature', description: 'Spicy chickpeas with fried bread', category: 'Mains', price: 140, isVegetarian: true },
+    // Bombay Lanes (featured restaurant — Lower Edmonton)
+    { restaurant: r5, name: 'Chicken Tikka', description: 'Tender chicken marinated in spiced yogurt, grilled in tandoor', category: 'Starters', price: 320, isVegetarian: false },
+    { restaurant: r5, name: 'Onion Bhaji', description: 'Crispy spiced onion fritters served with mint chutney', category: 'Starters', price: 180, isVegetarian: true },
+    { restaurant: r5, name: 'Seekh Kebab', description: 'Minced lamb kebab with herbs, grilled on skewer', category: 'Starters', price: 340, isVegetarian: false },
+    { restaurant: r5, name: 'Paneer Tikka', description: 'Marinated cottage cheese cubes grilled in tandoor', category: 'Starters', price: 290, isVegetarian: true },
+    { restaurant: r5, name: 'Samosa (2 pcs)', description: 'Crispy pastry filled with spiced potato and peas', category: 'Starters', price: 150, isVegetarian: true },
+    { restaurant: r5, name: 'Papdi Chaat', description: 'Crispy wafers topped with yogurt, tamarind and chutneys', category: 'Starters', price: 200, isVegetarian: true },
+    { restaurant: r5, name: 'Lamb Rogan Josh', description: 'Slow-cooked Kashmiri lamb curry with aromatic spices', category: 'Mains', price: 480, isVegetarian: false },
+    { restaurant: r5, name: 'Butter Chicken', description: 'Tender chicken in a rich, creamy tomato sauce', category: 'Mains', price: 440, isVegetarian: false },
+    { restaurant: r5, name: 'Chicken Balti', description: 'Classic Birmingham-style balti with fresh herbs and spices', category: 'Mains', price: 450, isVegetarian: false },
+    { restaurant: r5, name: 'Paneer Butter Masala', description: 'Cottage cheese in silky tomato-cream gravy', category: 'Mains', price: 400, isVegetarian: true },
+    { restaurant: r5, name: 'Dal Tadka', description: 'Yellow lentils tempered with cumin and garlic', category: 'Mains', price: 320, isVegetarian: true },
+    { restaurant: r5, name: 'Saag Aloo', description: 'Spinach and potato cooked with ginger and cumin', category: 'Mains', price: 310, isVegetarian: true },
+    { restaurant: r5, name: 'Lamb Keema Matar', description: 'Minced lamb with garden peas in a rich masala sauce', category: 'Mains', price: 460, isVegetarian: false },
+    { restaurant: r5, name: 'Chicken Tikka Masala', description: "Britain's favourite — grilled tikka in a velvety masala sauce", category: 'Mains', price: 460, isVegetarian: false },
+    { restaurant: r5, name: 'Mixed Vegetable Curry', description: 'Seasonal vegetables in a mild coconut and tomato sauce', category: 'Mains', price: 350, isVegetarian: true },
+    { restaurant: r5, name: 'Basmati Pilau Rice', description: 'Fragrant long-grain rice cooked with whole spices', category: 'Rice & Breads', price: 130, isVegetarian: true },
+    { restaurant: r5, name: 'Plain Naan', description: 'Soft leavened flatbread baked fresh in tandoor', category: 'Rice & Breads', price: 100, isVegetarian: true },
+    { restaurant: r5, name: 'Garlic Naan', description: 'Naan brushed with garlic butter and fresh coriander', category: 'Rice & Breads', price: 120, isVegetarian: true },
+    { restaurant: r5, name: 'Cheese Naan', description: 'Naan stuffed with melted cheese and herbs', category: 'Rice & Breads', price: 150, isVegetarian: true },
+    { restaurant: r5, name: 'Lamb Biryani', description: 'Slow-cooked spiced lamb layered with saffron basmati rice', category: 'Rice & Breads', price: 520, isVegetarian: false },
+    { restaurant: r5, name: 'Chicken Biryani', description: 'Aromatic chicken biryani cooked dum style', category: 'Rice & Breads', price: 490, isVegetarian: false },
+    { restaurant: r5, name: 'Mango Lassi', description: 'Chilled blended yogurt with Alphonso mango', category: 'Drinks', price: 160, isVegetarian: true },
+    { restaurant: r5, name: 'Masala Chai', description: 'Spiced Indian tea with ginger and cardamom', category: 'Drinks', price: 90, isVegetarian: true },
+    { restaurant: r5, name: 'Rose Sharbat', description: 'Chilled rose-flavoured drink with basil seeds', category: 'Drinks', price: 120, isVegetarian: true },
+    { restaurant: r5, name: 'Gulab Jamun', description: 'Soft milk-solid dumplings soaked in rose-sugar syrup', category: 'Desserts', price: 180, isVegetarian: true },
+    { restaurant: r5, name: 'Kulfi', description: 'Traditional Indian ice cream — pistachio or mango', category: 'Desserts', price: 200, isVegetarian: true },
+    { restaurant: r5, name: 'Kheer', description: 'Slow-cooked rice pudding with cardamom and saffron', category: 'Desserts', price: 160, isVegetarian: true }
   ];
 
   items.forEach((item) => {
@@ -494,6 +534,20 @@ app.get('/api/restaurants/:id/reviews', (req, res) => {
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json({ success: true, reviews });
+});
+
+// ── Admin routes ─────────────────────────────────────────────────────────────
+app.get('/api/admin/users', authenticate, authorize('admin'), (_req, res) => {
+  const users = db.users.filter((u) => !u.isDeleted).map(safeUser);
+  res.json({ success: true, users });
+});
+
+app.delete('/api/admin/users/:id', authenticate, authorize('admin'), (req, res) => {
+  const user = db.users.find((u) => u._id === req.params.id && !u.isDeleted);
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+  if (user._id === req.user._id) return res.status(400).json({ success: false, message: 'Cannot delete yourself' });
+  user.isDeleted = true;
+  return res.json({ success: true, message: 'User deleted' });
 });
 
 // ── Search route ──────────────────────────────────────────────────────────────

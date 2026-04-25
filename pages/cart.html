@@ -10,19 +10,40 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/checkout.html">Checkout</a></nav>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
-  <main class="container grid" style="grid-template-columns:2fr 1fr;">
+  <main class="container checkout-grid">
     <section>
       <h1>Your Cart</h1>
+      <p id="cart-restaurant" class="muted" style="font-weight:600;margin-bottom:.5rem"></p>
       <ul id="cart-items" class="list"></ul>
-      <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear cart</button>
+      <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear Cart</button>
+        <a class="btn" id="checkout-link" href="/pages/checkout.html">Proceed to Checkout →</a>
+      </div>
     </section>
-    <aside class="card" id="cart-summary"></aside>
+    <aside class="card" id="cart-summary" style="position:sticky;top:5rem;align-self:start"></aside>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    BombayLane.cart.render();
+    // Disable checkout button if cart is empty
+    (function() {
+      const link = document.getElementById('checkout-link');
+      if (link && !BombayLane.cart.getItems().length) {
+        link.classList.add('btn-secondary');
+        link.style.pointerEvents = 'none';
+        link.style.opacity = '0.5';
+      }
+    }());
+  </script>
 </body>
 </html>

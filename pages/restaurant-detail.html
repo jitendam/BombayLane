@@ -3,27 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant Detail | BombayLane</title>
+  <title>Restaurant | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">← Restaurants</a>
+      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
+
   <main class="container">
-    <section class="card">
-      <h1 id="restaurant-name">Restaurant</h1>
-      <p id="restaurant-meta" class="muted">Loading...</p>
+    <div id="restaurant-loading" class="spinner" style="margin:3rem auto" aria-label="Loading"></div>
+
+    <section class="card restaurant-hero" style="margin-bottom:1rem">
+      <h1 id="restaurant-name">Loading…</h1>
+      <p id="restaurant-meta" class="muted"></p>
+      <p id="restaurant-description" class="muted"></p>
+      <p id="restaurant-hours" class="muted" style="font-size:.9rem"></p>
     </section>
-    <ul id="menu-list" class="list"></ul>
+
+    <div id="menu-list"></div>
+
+    <!-- Reviews -->
+    <section class="card" style="margin-top:1.5rem">
+      <h2>Reviews</h2>
+      <ul id="reviews-list" class="list"></ul>
+
+      <details style="margin-top:1rem">
+        <summary class="btn btn-secondary" style="cursor:pointer;display:inline-flex">Write a Review</summary>
+        <form id="review-form" class="form-grid" style="margin-top:1rem" novalidate>
+          <div>
+            <label class="label" for="review-rating">Rating (1–5)</label>
+            <select id="review-rating" name="rating" class="input" required>
+              <option value="5">★★★★★ (5)</option>
+              <option value="4">★★★★☆ (4)</option>
+              <option value="3">★★★☆☆ (3)</option>
+              <option value="2">★★☆☆☆ (2)</option>
+              <option value="1">★☆☆☆☆ (1)</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="review-comment">Comment (optional)</label>
+            <textarea id="review-comment" name="comment" class="input" rows="3" placeholder="Share your experience…"></textarea>
+          </div>
+          <button class="btn" type="submit">Submit Review</button>
+        </form>
+      </details>
+    </section>
   </main>
+
+  <!-- Floating cart button -->
+  <a id="view-cart-btn" href="/pages/cart.html" class="floating-cart-btn" aria-label="View cart">
+    🛒 Cart <span id="cart-count-2" class="pill">0</span>
+  </a>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script>
+    BombayLane.restaurants.init();
+    // Keep second cart count in sync
+    setInterval(() => {
+      const count = BombayLane.cart.getItems().reduce((s, i) => s + i.quantity, 0);
+      const el = document.getElementById('cart-count-2');
+      if (el) el.textContent = count;
+    }, 500);
+  </script>
 </body>
 </html>

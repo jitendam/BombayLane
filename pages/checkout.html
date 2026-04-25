@@ -8,24 +8,80 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container">
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+    </nav>
+  </header>
+  <main class="container checkout-grid">
     <section class="card">
       <h1>Checkout</h1>
-      <p class="muted">Payment integration prepared for Stripe.</p>
-      <div class="form-grid">
-        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
-        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
-        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
+      <div id="restaurant-info" class="restaurant-info-bar muted"></div>
+      <div class="form-grid" style="margin-top:1rem">
+        <div>
+          <label class="label" for="delivery-address">Delivery Address</label>
+          <textarea id="delivery-address" class="input" rows="3" placeholder="Enter your full delivery address" required></textarea>
+        </div>
+        <div id="empty-cart-msg" class="muted hidden" style="text-align:center;padding:1rem">
+          Your cart is empty. <a href="/pages/restaurants.html">Browse restaurants →</a>
+        </div>
+        <button id="place-order-btn" class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
       </div>
-      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
     </section>
+
+    <aside>
+      <div class="card" style="position:sticky;top:5rem">
+        <h2 style="margin-top:0">Order Summary</h2>
+        <p id="cart-restaurant" class="muted" style="font-weight:600"></p>
+        <ul id="cart-items" class="list"></ul>
+        <div id="cart-summary"></div>
+      </div>
+    </aside>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script>
+    BombayLane.cart.render('cart-items', 'cart-summary');
+
+    // Auto-fill delivery address from profile
+    (function () {
+      try {
+        const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
+        if (user.address) {
+          document.getElementById('delivery-address').value = user.address;
+        }
+      } catch {}
+
+      // Show/hide empty state
+      const items = BombayLane.cart.getItems();
+      const btn = document.getElementById('place-order-btn');
+      const emptyMsg = document.getElementById('empty-cart-msg');
+      if (!items.length) {
+        if (btn) btn.disabled = true;
+        if (emptyMsg) emptyMsg.classList.remove('hidden');
+      } else {
+        const restBar = document.getElementById('restaurant-info');
+        const name = BombayLane.cart.getRestaurantName();
+        if (restBar && name) restBar.textContent = `Ordering from: ${name}`;
+      }
+
+      // Require login
+      if (!localStorage.getItem('bl_token')) {
+        const btn2 = document.getElementById('place-order-btn');
+        if (btn2) {
+          btn2.disabled = true;
+          btn2.textContent = 'Login to place order';
+          btn2.onclick = () => { window.location.href = '/pages/auth.html'; };
+        }
+        BombayLane.notify('Please login to checkout');
+      }
+    }());
+  </script>
 </body>
 </html>

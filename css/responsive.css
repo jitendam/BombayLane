@@ -1,5 +1,6 @@
 @media (max-width: 900px) {
   .grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  .checkout-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -7,4 +8,9 @@
   .grid.cols-3 { grid-template-columns: 1fr; }
   .container { padding: .75rem; }
   .btn { width: 100%; }
+  .checkout-grid { grid-template-columns: 1fr; }
+  .admin-table { font-size: .8rem; }
+  .admin-table th, .admin-table td { padding: .5rem .6rem; }
+  .status-bar { flex-wrap: nowrap; }
+  .floating-cart-btn { bottom: 1rem; right: 1rem; }
 }

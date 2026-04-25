@@ -17,31 +17,35 @@
       <a href="/pages/orders.html">Orders</a>
       <a href="/pages/profile.html">Profile</a>
       <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+      <button id="theme-toggle" class="btn btn-secondary">Dark mode</button>
     </nav>
   </header>
 
   <main class="container">
-    <section class="hero card fade-in">
-      <h1>Order authentic meals in minutes</h1>
-      <p>Search restaurants, add favorites to cart, and track every step from kitchen to doorstep.</p>
-      <div class="actions">
+    <section class="hero card fade-in" style="margin-bottom:1.5rem">
+      <h1>Authentic Indian food, delivered fast</h1>
+      <p>Explore Bombay Lanes and more. Add favourites to cart and track every step from kitchen to doorstep.</p>
+      <div class="actions" style="display:flex;gap:.75rem;flex-wrap:wrap">
         <a class="btn" href="/pages/restaurants.html">Start Ordering</a>
-        <a class="btn btn-secondary" href="/pages/auth.html">Login / Register</a>
+        <a class="btn btn-secondary" href="/pages/auth.html" id="auth-link">Login / Register</a>
       </div>
     </section>
 
     <section class="grid cols-3" aria-label="Quick actions">
-      <article class="card">
-        <h2>Explore Restaurants</h2>
-        <p>Filter by cuisine, ratings, and delivery time.</p>
+      <article class="card fade-in">
+        <h2>🍛 Bombay Lanes</h2>
+        <p>Award-winning Indian restaurant in Lower Edmonton — now online. Starters, curries, biryanis and more.</p>
+        <a class="btn" href="/pages/restaurants.html">Browse Menu</a>
       </article>
-      <article class="card">
-        <h2>Live Tracking</h2>
-        <p>Follow order status in real time from placed to delivered.</p>
+      <article class="card fade-in">
+        <h2>📍 Live Tracking</h2>
+        <p>Follow your order status in real time — from Placed to Out for Delivery to Delivered.</p>
+        <a class="btn btn-secondary" href="/pages/orders.html">My Orders</a>
       </article>
-      <article class="card">
-        <h2>Secure Checkout</h2>
-        <p>Validated checkout flow with taxes and delivery fee calculation.</p>
+      <article class="card fade-in">
+        <h2>🔒 Secure Checkout</h2>
+        <p>Easy checkout with tax and delivery fee calculation. Your address saved for next time.</p>
+        <a class="btn btn-secondary" href="/pages/cart.html">View Cart</a>
       </article>
     </section>
   </main>
@@ -50,5 +54,16 @@
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    // Update auth link if already logged in
+    (function() {
+      const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
+      const authLink = document.getElementById('auth-link');
+      if (user.name && authLink) {
+        authLink.textContent = user.name;
+        authLink.href = '/pages/profile.html';
+      }
+    }());
+  </script>
 </body>
 </html>

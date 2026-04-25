@@ -8,17 +8,122 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a><button id="theme-toggle" class="btn btn-secondary">Dark mode</button></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">BombayLane</a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a>
+      <button id="theme-toggle" class="btn btn-secondary">Dark mode</button>
+    </nav>
+  </header>
   <main class="container">
-    <section class="card">
+    <div id="not-logged-in" class="card hidden" style="text-align:center;padding:2rem">
+      <p>You are not logged in.</p>
+      <a class="btn" href="/pages/auth.html">Login / Register</a>
+    </div>
+
+    <section id="profile-section" class="card hidden">
       <h1>My Profile</h1>
-      <pre id="profile-data" class="muted"></pre>
+      <p id="profile-role" class="muted" style="text-transform:capitalize"></p>
+      <form id="profile-form" class="form-grid" novalidate style="margin-top:1rem">
+        <div>
+          <label class="label" for="prof-name">Name</label>
+          <input id="prof-name" name="name" class="input" type="text" placeholder="Your name" required>
+        </div>
+        <div>
+          <label class="label" for="prof-phone">Phone</label>
+          <input id="prof-phone" name="phone" class="input" type="tel" placeholder="Your phone number">
+        </div>
+        <div>
+          <label class="label" for="prof-address">Default Delivery Address</label>
+          <textarea id="prof-address" name="address" class="input" rows="3" placeholder="Your default delivery address"></textarea>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center">
+          <button class="btn" type="submit" id="save-profile-btn">Save Changes</button>
+          <span id="profile-save-status" class="muted hidden">✓ Saved</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:1rem">
+      <h2>Account</h2>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <a class="btn btn-secondary" href="/pages/orders.html">View Orders</a>
+        <button id="logout-btn" class="btn" style="background:#dc2626">Logout</button>
+      </div>
     </section>
   </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/auth.js"></script>
   <script src="/js/main.js"></script>
   <script>
-    const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
-    document.getElementById('profile-data').textContent = JSON.stringify(user, null, 2) || 'No user logged in';
+    (function () {
+      const token = localStorage.getItem('bl_token');
+      const notLoggedIn = document.getElementById('not-logged-in');
+      const profileSection = document.getElementById('profile-section');
+
+      if (!token) {
+        notLoggedIn.classList.remove('hidden');
+        return;
+      }
+
+      profileSection.classList.remove('hidden');
+
+      // Load user from localStorage first (fast), then refresh from API
+      const loadProfile = (user) => {
+        document.getElementById('prof-name').value = user.name || '';
+        document.getElementById('prof-phone').value = user.phone || '';
+        document.getElementById('prof-address').value = user.address || '';
+        document.getElementById('profile-role').textContent = `Role: ${user.role || 'customer'}`;
+      };
+
+      try {
+        const cached = JSON.parse(localStorage.getItem('bl_user') || '{}');
+        if (cached.name) loadProfile(cached);
+      } catch {}
+
+      BombayLane.api.request('/api/auth/me')
+        .then((res) => {
+          localStorage.setItem('bl_user', JSON.stringify(res.user));
+          loadProfile(res.user);
+        })
+        .catch(() => {});
+
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('save-profile-btn');
+        const status = document.getElementById('profile-save-status');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+        try {
+          const res = await BombayLane.api.request('/api/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify({
+              name: document.getElementById('prof-name').value.trim(),
+              phone: document.getElementById('prof-phone').value.trim(),
+              address: document.getElementById('prof-address').value.trim()
+            })
+          });
+          localStorage.setItem('bl_user', JSON.stringify(res.user));
+          status.classList.remove('hidden');
+          setTimeout(() => status.classList.add('hidden'), 2500);
+        } catch (err) {
+          BombayLane.notify(err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Save Changes';
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        BombayLane.auth.clearAuth();
+        BombayLane.notify('Logged out');
+        setTimeout(() => { window.location.href = '/pages/auth.html'; }, 800);
+      });
+    }());
   </script>
 </body>
 </html>

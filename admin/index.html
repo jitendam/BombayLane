@@ -8,11 +8,20 @@
   <link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane Admin</a></header>
+  <header class="topbar">
+    <a class="brand" href="/admin/index.html">BombayLane Admin</a>
+    <nav class="nav-links">
+      <a href="/admin/restaurants.html">Restaurants</a>
+      <a href="/admin/orders.html">Orders</a>
+      <a href="/admin/users.html">Users</a>
+      <a href="/index.html" class="muted">← Site</a>
+    </nav>
+  </header>
   <main class="container">
-    <nav class="nav-links"><a href="/admin/restaurants.html">Restaurants</a><a href="/admin/orders.html">Orders</a><a href="/admin/users.html">Users</a></nav>
+    <h1>Dashboard</h1>
     <section id="admin-stats" class="grid cols-3"></section>
   </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/admin.js"></script>
 </body>
