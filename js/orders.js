@@ -1,5 +1,7 @@
 window.BombayLane = window.BombayLane || {};
 
+const PENDING_ORDER_KEY = 'bl_pending_order';
+
 const nextStatus = {
   placed: 'confirmed',
   confirmed: 'preparing',
@@ -24,6 +26,8 @@ BombayLane.orders = {
       return;
     }
 
+    localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify({ restaurantId, deliveryAddress }));
+
     try {
       await BombayLane.api.request('/api/orders', {
         method: 'POST',
@@ -34,11 +38,34 @@ BombayLane.orders = {
         })
       });
 
+      localStorage.removeItem(PENDING_ORDER_KEY);
       BombayLane.cart.clear();
       BombayLane.notify('Order placed successfully');
     } catch (error) {
-      BombayLane.notify(error.message);
+      BombayLane.notify(error.message + ' — your details have been saved. Review and submit again.');
     }
+  },
+  restorePending() {
+    let pending;
+    try {
+      pending = JSON.parse(localStorage.getItem(PENDING_ORDER_KEY));
+    } catch {
+      pending = null;
+    }
+    if (!pending) return;
+
+    const restaurantInput = document.getElementById('restaurant-id');
+    const addressInput = document.getElementById('delivery-address');
+    if (restaurantInput) restaurantInput.value = pending.restaurantId || '';
+    if (addressInput) addressInput.value = pending.deliveryAddress || '';
+
+    const banner = document.getElementById('retry-banner');
+    if (banner) banner.hidden = false;
+  },
+  dismissRetry() {
+    localStorage.removeItem(PENDING_ORDER_KEY);
+    const banner = document.getElementById('retry-banner');
+    if (banner) banner.hidden = true;
   },
   async loadHistory() {
     const list = document.getElementById('orders-list');

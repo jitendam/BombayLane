@@ -10,6 +10,10 @@
 <body>
   <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
   <main class="container">
+    <div id="retry-banner" class="card retry-banner" hidden>
+      <span>⚠️ Your previous order wasn't placed. Your details have been restored — review and try again.</span>
+      <button class="btn btn-secondary" onclick="BombayLane.orders.dismissRetry()">Dismiss</button>
+    </div>
     <section class="card">
       <h1>Checkout</h1>
       <p class="muted">Payment integration prepared for Stripe.</p>
@@ -26,6 +30,6 @@
   <script src="/js/cart.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script>BombayLane.cart.render('cart-items','cart-summary'); BombayLane.orders.restorePending();</script>
 </body>
 </html>
