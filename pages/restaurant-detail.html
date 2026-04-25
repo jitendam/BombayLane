@@ -185,8 +185,8 @@
         menuData = mRes.items || [];
         const cats = [...new Set(menuData.map((m) => m.category))];
         const chips = document.getElementById('cat-chips');
-        chips.innerHTML = `<span class="chip active" data-cat="" onclick="filterCategory('')">All</span>` +
-          cats.map((c) => `<span class="chip" data-cat="${BombayLane.escapeAttr(c)}" onclick="filterCategory('${BombayLane.escapeAttr(c)}')">${BombayLane.escapeHtml(c)}</span>`).join('');
+        chips.innerHTML = `<button class="chip active" role="button" tabindex="0" data-cat="" onclick="filterCategory('')">All</button>` +
+          cats.map((c) => `<button class="chip" role="button" tabindex="0" data-cat="${BombayLane.escapeAttr(c)}" onclick="filterCategory('${BombayLane.escapeAttr(c)}')">${BombayLane.escapeHtml(c)}</button>`).join('');
 
         renderMenu();
         updateCartFloat();

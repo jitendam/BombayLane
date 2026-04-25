@@ -95,7 +95,11 @@
     let activeCuisine = '';
     function setCuisine(c) {
       activeCuisine = c;
-      document.querySelectorAll('.chip').forEach((ch) => ch.classList.toggle('active', ch.textContent.includes(c) && c !== '' || (c === '' && ch.textContent === 'All')));
+      document.querySelectorAll('.chip').forEach((ch) => {
+        const isAll    = (c === '' && ch.textContent === 'All');
+        const isMatch  = (c !== '' && ch.textContent.includes(c));
+        ch.classList.toggle('active', isAll || isMatch);
+      });
       loadFeatured();
     }
 

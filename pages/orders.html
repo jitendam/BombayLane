@@ -166,6 +166,12 @@
       } catch (e) { BombayLane.notify(e.message); }
     }
 
+    // Cleanup tracking interval when leaving the page
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) clearInterval(trackingInterval);
+    });
+    window.addEventListener('beforeunload', () => clearInterval(trackingInterval));
+
     // Auto-track if redirect from checkout
     const trackId = new URLSearchParams(location.search).get('track');
 
