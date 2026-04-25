@@ -139,7 +139,7 @@
           document.getElementById('tracking-eta').textContent = status === 'delivered' ? '✅ Order delivered!' : `Estimated delivery: ${eta.toLocaleTimeString()}`;
         }
         if (['delivered','cancelled'].includes(status)) clearInterval(trackingInterval);
-      } catch(e) { /* ignore polling errors */ }
+      } catch(e) { console.warn('[tracking poll]', e.message); }
     }
 
     function closeTracking() {

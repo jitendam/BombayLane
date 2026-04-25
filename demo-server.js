@@ -10,11 +10,12 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 require('dotenv').config();
-const express = require('express');
-const bcrypt  = require('bcryptjs');
-const jwt     = require('jsonwebtoken');
-const path    = require('path');
-const crypto  = require('crypto');
+const express   = require('express');
+const bcrypt    = require('bcryptjs');
+const jwt       = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const path      = require('path');
+const crypto    = require('crypto');
 
 const app        = express();
 const PORT       = process.env.PORT || 5000;
@@ -25,6 +26,12 @@ const FREE_DELIVERY  = 500;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+/* ── rate limiters ───────────────────────────────────────────────────────── */
+const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
+const authLimiter   = rateLimit({ windowMs: 15 * 60 * 1000, max: 20,  standardHeaders: true, legacyHeaders: false });
+app.use(globalLimiter);
+
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const uid  = () => crypto.randomUUID();
@@ -75,7 +82,12 @@ const DB = {
   ],
   orders:  [],
   reviews: [],
+  _intervals: new Map(), /* tracks auto-advance timers keyed by order ID */
 };
+
+/* cleanup timers on graceful shutdown */
+process.on('SIGTERM', () => { DB._intervals.forEach(clearInterval); process.exit(0); });
+process.on('SIGINT',  () => { DB._intervals.forEach(clearInterval); process.exit(0); });
 
 /* ── auth middleware ─────────────────────────────────────────────────────── */
 function authenticate(req, res, next) {
@@ -111,7 +123,7 @@ const safeUser = (u) => ({ id: u.id, name: u.name, email: u.email, role: u.role,
 app.get('/health', (_req, res) => ok(res, { status: 'ok', service: 'BombayLane Demo API', mode: 'in-memory' }));
 
 /* ── auth ─────────────────────────────────────────────────────────────────── */
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   const email    = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '');
   const user     = DB.users.find((u) => u.email === email);
@@ -122,7 +134,7 @@ app.post('/api/auth/login', async (req, res) => {
   ok(res, { token, user: safeUser(user) });
 });
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', authLimiter, async (req, res) => {
   const { name, role, phone, address } = req.body;
   const email    = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '');
@@ -257,19 +269,25 @@ app.post('/api/orders', authenticate, (req, res) => {
   };
   DB.orders.unshift(order);
 
-  /* auto-advance status every 30 s for demo */
+  /* auto-advance status every 30 s for demo — track interval for cleanup */
   let step = 0;
   const advance = setInterval(() => {
     step += 1;
-    if (step >= STATUS_FLOW.length) { clearInterval(advance); return; }
+    if (step >= STATUS_FLOW.length) {
+      clearInterval(advance);
+      DB._intervals.delete(order.id);
+      return;
+    }
     const o = DB.orders.find((x) => x.id === order.id);
     if (o && o.status !== 'cancelled') {
       o.status = STATUS_FLOW[step];
       o.statusHistory.push({ status: STATUS_FLOW[step], at: now() });
     } else {
       clearInterval(advance);
+      DB._intervals.delete(order.id);
     }
   }, 30_000);
+  DB._intervals.set(order.id, advance);
 
   ok(res, { order }, 201);
 });
