@@ -3,22 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant Detail | BombayLane</title>
+  <title>Menu | BombayLane</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links">
+      <a href="/pages/restaurants.html">← Back</a>
+      <a href="/pages/cart.html" class="cart-btn">🛒 Cart <span id="cart-count" class="pill">0</span></a>
+    </nav>
   </header>
-  <main class="container">
-    <section class="card">
-      <h1 id="restaurant-name">Restaurant</h1>
-      <p id="restaurant-meta" class="muted">Loading...</p>
-    </section>
-    <ul id="menu-list" class="list"></ul>
-  </main>
+
+  <div class="detail-hero">
+    <div class="container" style="padding-top:.5rem;padding-bottom:.5rem">
+      <h1 id="restaurant-name">Loading…</h1>
+      <p id="restaurant-meta" class="meta">—</p>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:1rem">
+    <!-- Category filter tabs -->
+    <div class="card" style="padding:.75rem 1rem;margin-bottom:1rem">
+      <div class="category-tabs" id="cat-tabs" role="tablist" aria-label="Menu categories"></div>
+    </div>
+
+    <!-- Menu + Cart panel layout -->
+    <div class="menu-layout">
+      <div>
+        <div class="grid cols-3" id="menu-list" aria-live="polite"></div>
+      </div>
+
+      <!-- Sticky cart sidebar (desktop only) -->
+      <aside class="cart-panel" id="side-cart-panel">
+        <div class="cart-panel-header">🛒 Your Order</div>
+        <div class="cart-panel-body" id="side-cart-body">
+          <p class="cart-panel-empty">No items yet.<br>Add something delicious!</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>

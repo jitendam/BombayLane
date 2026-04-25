@@ -3,52 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BombayLane | Food Delivery</title>
+  <title>BombayLane | Authentic Indian Delivery</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/animations.css">
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
+  <div class="promo-banner">🎉 Free delivery on orders over ₹500 &nbsp;|&nbsp; 30-minute guarantee or your next order free!</div>
+
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="/pages/restaurants.html">Restaurants</a>
-      <a href="/pages/orders.html">Orders</a>
-      <a href="/pages/profile.html">Profile</a>
-      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+      <a href="/pages/restaurants.html">Menu</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/auth.html" id="nav-auth">Login</a>
+      <a href="/pages/cart.html" class="cart-btn" aria-label="Shopping cart">🛒 Cart <span id="cart-count" class="pill">0</span></a>
     </nav>
   </header>
 
+  <section class="hero-section">
+    <h1>Bombay flavours,<br>at your door.</h1>
+    <p>Fresh North Indian cuisine delivered hot in 30 minutes or less.</p>
+    <div class="hero-actions">
+      <a class="btn btn-white btn-lg" href="/pages/restaurants.html">🍛 Order Now</a>
+      <a class="btn btn-outline" style="border-color:rgba(255,255,255,0.6);color:#fff;" href="/pages/auth.html">Login / Sign Up</a>
+    </div>
+  </section>
+
   <main class="container">
-    <section class="hero card fade-in">
-      <h1>Order authentic meals in minutes</h1>
-      <p>Search restaurants, add favorites to cart, and track every step from kitchen to doorstep.</p>
-      <div class="actions">
-        <a class="btn" href="/pages/restaurants.html">Start Ordering</a>
-        <a class="btn btn-secondary" href="/pages/auth.html">Login / Register</a>
+    <section style="margin-bottom:2rem">
+      <div class="grid cols-3" style="gap:1rem">
+        <article class="card fade-in" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:.5rem">🕐</div>
+          <h3 style="margin:0 0 .35rem;font-size:1rem">30-Min Delivery</h3>
+          <p class="muted" style="margin:0;font-size:.88rem">Your order, at lightning speed from kitchen to door.</p>
+        </article>
+        <article class="card fade-in" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:.5rem">👨‍🍳</div>
+          <h3 style="margin:0 0 .35rem;font-size:1rem">Freshly Cooked</h3>
+          <p class="muted" style="margin:0;font-size:.88rem">Every dish made to order with authentic spices and care.</p>
+        </article>
+        <article class="card fade-in" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:.5rem">📦</div>
+          <h3 style="margin:0 0 .35rem;font-size:1rem">Live Order Tracking</h3>
+          <p class="muted" style="margin:0;font-size:.88rem">Watch your order go from placed → confirmed → delivered.</p>
+        </article>
       </div>
     </section>
 
-    <section class="grid cols-3" aria-label="Quick actions">
-      <article class="card">
-        <h2>Explore Restaurants</h2>
-        <p>Filter by cuisine, ratings, and delivery time.</p>
-      </article>
-      <article class="card">
-        <h2>Live Tracking</h2>
-        <p>Follow order status in real time from placed to delivered.</p>
-      </article>
-      <article class="card">
-        <h2>Secure Checkout</h2>
-        <p>Validated checkout flow with taxes and delivery fee calculation.</p>
-      </article>
+    <section style="background:var(--brand);border-radius:1rem;padding:2rem;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
+      <div>
+        <h2 style="margin:0 0 .4rem;font-size:1.4rem">Bombay Lanes</h2>
+        <p style="margin:0;opacity:.9;font-size:.9rem">North Indian • Street Food • Mughlai &nbsp;·&nbsp; 12 Linking Road, Bandra, Mumbai</p>
+        <p style="margin:.4rem 0 0;opacity:.8;font-size:.85rem">⭐ 4.6 &nbsp;|&nbsp; 🕐 ~30 min delivery</p>
+      </div>
+      <a class="btn btn-white btn-lg" href="/pages/restaurants.html">View Full Menu →</a>
+    </section>
+
+    <section>
+      <h2 class="section-header">Popular Dishes</h2>
+      <div class="grid cols-3" id="popular-items"></div>
     </section>
   </main>
+
+  <footer style="text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:2rem">
+    © 2025 BombayLane &nbsp;·&nbsp; Authentic Indian Delivery
+  </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    // Show popular items on home page
+    (async () => {
+      try {
+        const res = await BombayLane.api.request('/api/restaurants');
+        const restaurants = res.restaurants || [];
+        if (!restaurants.length) return;
+        const r = restaurants[0];
+        const menuRes = await BombayLane.api.request(`/api/restaurants/${r._id}/menu`);
+        const items = (menuRes.items || []).filter(i => ['Butter Chicken','Chicken Biryani','Paneer Tikka','Gulab Jamun','Mango Lassi','Seekh Kebab'].includes(i.name)).slice(0, 6);
+        const grid = document.getElementById('popular-items');
+        if (!grid || !items.length) return;
+        grid.innerHTML = items.map(item => `
+          <article class="menu-card fade-in">
+            <img class="menu-card-img" src="https://picsum.photos/seed/${BombayLane.escapeAttr(item._id)}/400/200" alt="${BombayLane.escapeAttr(item.name)}" loading="lazy">
+            <div class="menu-card-body">
+              <p class="menu-card-name">${BombayLane.escapeHtml(item.name)}</p>
+              <p class="menu-card-desc">${BombayLane.escapeHtml(item.description || '')}</p>
+              <div class="menu-card-footer">
+                <span class="menu-card-price">₹${item.price}</span>
+                <a class="btn btn-sm" href="/pages/restaurants.html">Order</a>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      } catch (_) { /* silently skip */ }
+    })();
+
+    // Show user name if logged in
+    try {
+      const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+      if (user && user.name) {
+        const el = document.getElementById('nav-auth');
+        if (el) { el.textContent = user.name.split(' ')[0]; el.href = '/pages/profile.html'; }
+      }
+    } catch (_) {}
+  </script>
 </body>
 </html>

@@ -3,4 +3,8 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(227,24,55,0.3); }
+  50% { box-shadow: 0 0 0 7px rgba(227,24,55,0.1); }
+}
 .fade-in { animation: fadeIn .3s ease; }

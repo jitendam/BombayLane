@@ -21,17 +21,33 @@ BombayLane.restaurants = {
 
       if (!data.length) {
         this.done = true;
-        if (!container.children.length) container.innerHTML = '<p class="card">No restaurants found.</p>';
+        if (!container.children.length) {
+          container.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1">
+              <div style="font-size:3rem;margin-bottom:.75rem">🍽️</div>
+              <h3>No restaurants found</h3>
+              <p>Try a different search term</p>
+            </div>`;
+        }
         return;
       }
 
-      const cards = data.map((restaurant) => `
-        <article class="card restaurant-card fade-in">
-          <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(restaurant._id)}/400/200" alt="${BombayLane.escapeAttr(restaurant.name)}" loading="lazy">
-          <h3>${BombayLane.escapeHtml(restaurant.name)}</h3>
-          <p class="muted">${BombayLane.escapeHtml(restaurant.location?.city || '')}</p>
-          <p class="rating">★ ${Number(restaurant.averageRating || 0).toFixed(1)}</p>
-          <a class="btn" href="/pages/restaurant-detail.html?id=${encodeURIComponent(restaurant._id)}">View Menu</a>
+      const FALLBACK_R = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop&auto=format&q=80';
+      const cards = data.map((r) => `
+        <article class="restaurant-card fade-in">
+          <img src="${r.imageUrl ? BombayLane.escapeAttr(r.imageUrl) : FALLBACK_R}" alt="${BombayLane.escapeAttr(r.name)}" loading="lazy" onerror="this.src='${FALLBACK_R}'">
+          <div class="restaurant-card-body">
+            <h3 class="restaurant-card-name">${BombayLane.escapeHtml(r.name)}</h3>
+            <p class="restaurant-card-meta">
+              ${BombayLane.escapeHtml((r.cuisine || []).join(' • '))} &nbsp;·&nbsp; ${BombayLane.escapeHtml(r.location?.city || '')}
+            </p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+              <span class="rating">★ ${Number(r.averageRating || 0).toFixed(1)}</span>
+              <span class="muted" style="font-size:.85rem">🕐 ~${r.deliveryTimeMinutes || 30} min</span>
+              <span class="badge badge-${r.isOpen ? 'delivered' : 'cancelled'}">${r.isOpen ? 'Open' : 'Closed'}</span>
+            </div>
+            <a class="btn btn-full" href="/pages/restaurant-detail.html?id=${encodeURIComponent(r._id)}">View Menu →</a>
+          </div>
         </article>
       `).join('');
 
@@ -41,10 +57,17 @@ BombayLane.restaurants = {
       BombayLane.notify(error.message);
     }
   },
+
   async loadDetail() {
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
     if (!id) return;
+
+    const menuList = document.getElementById('menu-list');
+    const catTabs = document.getElementById('cat-tabs');
+    if (!menuList) return;
+
+    menuList.innerHTML = '<div class="spinner" style="grid-column:1/-1"></div>';
 
     try {
       const [restaurantRes, menuRes] = await Promise.all([
@@ -52,23 +75,113 @@ BombayLane.restaurants = {
         BombayLane.api.request(`/api/restaurants/${id}/menu`)
       ]);
 
-      document.getElementById('restaurant-name').textContent = restaurantRes.restaurant.name;
-      document.getElementById('restaurant-meta').textContent = `${restaurantRes.restaurant.location.city} • ${restaurantRes.restaurant.deliveryTimeMinutes} mins`;
+      const r = restaurantRes.restaurant;
+      document.getElementById('restaurant-name').textContent = r.name;
+      document.getElementById('restaurant-meta').textContent =
+        `${(r.cuisine || []).join(' • ')}  ·  ${r.location?.city || ''}  ·  ⭐ ${Number(r.averageRating || 0).toFixed(1)}  ·  🕐 ~${r.deliveryTimeMinutes || 30} min`;
+      document.title = `${r.name} | BombayLane`;
 
-      const menu = document.getElementById('menu-list');
-      menu.innerHTML = (menuRes.items || []).map((item) => `
-        <li class="card row">
-          <div>
-            <strong>${BombayLane.escapeHtml(item.name)}</strong>
-            <p class="muted">₹${Number(item.price || 0)} • ${BombayLane.escapeHtml(item.category || 'General')}</p>
-          </div>
-          <button class="btn" onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)} })">Add</button>
-        </li>
-      `).join('');
+      // Apply restaurant banner image to hero section
+      if (r.imageUrl) {
+        const hero = document.querySelector('.detail-hero');
+        if (hero) {
+          hero.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)), url('${r.imageUrl}')`;
+          hero.style.backgroundSize = 'cover';
+          hero.style.backgroundPosition = 'center';
+        }
+      }
+
+      const items = menuRes.items || [];
+      const categories = [...new Set(items.map(i => i.category))];
+
+      // Build category tabs
+      if (catTabs && categories.length) {
+        catTabs.innerHTML = ['All', ...categories].map((cat) => `
+          <button class="cat-tab ${cat === 'All' ? 'active' : ''}"
+            data-cat="${BombayLane.escapeAttr(cat)}"
+            onclick="BombayLane.restaurants._filterMenu('${BombayLane.escapeAttr(cat)}')"
+            role="tab" aria-selected="${cat === 'All'}">
+            ${BombayLane.escapeHtml(cat)}
+          </button>
+        `).join('');
+      }
+
+      // Store all items and restaurant ID for filtering
+      this._allItems = items;
+      this._restaurantId = id;
+
+      this._renderMenuItems(items);
+      BombayLane.cart._refreshSidePanel();
     } catch (error) {
-      BombayLane.notify(error.message);
+      menuList.innerHTML = `<div class="card" style="grid-column:1/-1">${BombayLane.escapeHtml(error.message)}</div>`;
     }
   },
+
+  _filterMenu(category) {
+    // Update active tab
+    document.querySelectorAll('.cat-tab').forEach((btn) => {
+      const isActive = btn.dataset.cat === category;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive);
+    });
+
+    const filtered = category === 'All'
+      ? this._allItems
+      : (this._allItems || []).filter(i => i.category === category);
+
+    this._renderMenuItems(filtered);
+  },
+
+  _renderMenuItems(items) {
+    const menuList = document.getElementById('menu-list');
+    if (!menuList) return;
+
+    if (!items.length) {
+      menuList.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>No items in this category</h3></div>';
+      return;
+    }
+
+    const FALLBACK_M = 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop&auto=format&q=80';
+    menuList.innerHTML = items.map((item) => {
+      const vegClass = item.isVegetarian ? 'badge-veg' : 'badge-nonveg';
+      const vegLabel = item.isVegetarian ? 'Veg' : 'Non-Veg';
+      const imgSrc = item.imageUrl ? BombayLane.escapeAttr(item.imageUrl) : FALLBACK_M;
+      return `
+        <article class="menu-card fade-in"
+          data-item-id="${BombayLane.escapeAttr(item._id)}"
+          data-item-name="${BombayLane.escapeAttr(item.name)}"
+          data-item-price="${Number(item.price || 0)}"
+          data-restaurant-id="${BombayLane.escapeAttr(this._restaurantId || '')}">
+          <img class="menu-card-img" src="${imgSrc}" alt="${BombayLane.escapeAttr(item.name)}" loading="lazy" onerror="this.src='${FALLBACK_M}'">
+          <div class="menu-card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+              <h4 class="menu-card-name">${BombayLane.escapeHtml(item.name)}</h4>
+              <span class="badge ${vegClass}" style="flex-shrink:0">${vegLabel}</span>
+            </div>
+            <p class="menu-card-desc">${BombayLane.escapeHtml(item.description || '')}</p>
+            <div class="menu-card-footer">
+              <span class="menu-card-price">₹${Number(item.price || 0)}</span>
+              <button class="btn btn-sm add-to-cart-btn">+ Add</button>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+
+    // Use event delegation — no inline JS, no string-embedded data
+    menuList.querySelectorAll('.add-to-cart-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('[data-item-id]');
+        if (!card) return;
+        BombayLane.cart.add({
+          id: card.dataset.itemId,
+          name: card.dataset.itemName,
+          price: Number(card.dataset.itemPrice),
+          restaurantId: card.dataset.restaurantId
+        });
+      });
+    });
+  },
+
   init() {
     const search = document.getElementById('search-input');
     const cuisine = document.getElementById('cuisine-filter');
@@ -80,7 +193,7 @@ BombayLane.restaurants = {
       this.fetchList(true);
 
       window.addEventListener('scroll', () => {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 120) {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 150) {
           this.fetchList();
         }
       });
