@@ -32,9 +32,10 @@ BombayLane.restaurants = {
         return;
       }
 
+      const FALLBACK_R = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop&auto=format&q=80';
       const cards = data.map((r) => `
         <article class="restaurant-card fade-in">
-          <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(r._id)}/400/200" alt="${BombayLane.escapeAttr(r.name)}" loading="lazy">
+          <img src="${r.imageUrl ? BombayLane.escapeAttr(r.imageUrl) : FALLBACK_R}" alt="${BombayLane.escapeAttr(r.name)}" loading="lazy" onerror="this.src='${FALLBACK_R}'">
           <div class="restaurant-card-body">
             <h3 class="restaurant-card-name">${BombayLane.escapeHtml(r.name)}</h3>
             <p class="restaurant-card-meta">
@@ -79,6 +80,16 @@ BombayLane.restaurants = {
       document.getElementById('restaurant-meta').textContent =
         `${(r.cuisine || []).join(' • ')}  ·  ${r.location?.city || ''}  ·  ⭐ ${Number(r.averageRating || 0).toFixed(1)}  ·  🕐 ~${r.deliveryTimeMinutes || 30} min`;
       document.title = `${r.name} | BombayLane`;
+
+      // Apply restaurant banner image to hero section
+      if (r.imageUrl) {
+        const hero = document.querySelector('.detail-hero');
+        if (hero) {
+          hero.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)), url('${r.imageUrl}')`;
+          hero.style.backgroundSize = 'cover';
+          hero.style.backgroundPosition = 'center';
+        }
+      }
 
       const items = menuRes.items || [];
       const categories = [...new Set(items.map(i => i.category))];
@@ -130,16 +141,18 @@ BombayLane.restaurants = {
       return;
     }
 
+    const FALLBACK_M = 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop&auto=format&q=80';
     menuList.innerHTML = items.map((item) => {
       const vegClass = item.isVegetarian ? 'badge-veg' : 'badge-nonveg';
       const vegLabel = item.isVegetarian ? 'Veg' : 'Non-Veg';
+      const imgSrc = item.imageUrl ? BombayLane.escapeAttr(item.imageUrl) : FALLBACK_M;
       return `
         <article class="menu-card fade-in"
           data-item-id="${BombayLane.escapeAttr(item._id)}"
           data-item-name="${BombayLane.escapeAttr(item.name)}"
           data-item-price="${Number(item.price || 0)}"
           data-restaurant-id="${BombayLane.escapeAttr(this._restaurantId || '')}">
-          <img class="menu-card-img" src="https://picsum.photos/seed/${BombayLane.escapeAttr(item._id)}/400/200" alt="${BombayLane.escapeAttr(item.name)}" loading="lazy">
+          <img class="menu-card-img" src="${imgSrc}" alt="${BombayLane.escapeAttr(item.name)}" loading="lazy" onerror="this.src='${FALLBACK_M}'">
           <div class="menu-card-body">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
               <h4 class="menu-card-name">${BombayLane.escapeHtml(item.name)}</h4>
