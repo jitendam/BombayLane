@@ -72,72 +72,52 @@ async function seedData () {
 
   // Restaurants
   const r1 = newId();
-  const r2 = newId();
-  const r3 = newId();
-  const r4 = newId();
 
   db.restaurants.push(
     {
-      _id: r1, name: 'Bombay Bites',
-      description: 'Authentic Mumbai street food and snacks',
-      cuisine: ['Street Food', 'North Indian'], owner: ownerId,
-      location: { address: '12 Juhu Beach Road', city: 'Mumbai', coordinates: { lat: 19.09, lng: 72.87 } },
-      openingHours: { open: '09:00', close: '23:00' },
-      averageRating: 4.5, deliveryTimeMinutes: 25, isOpen: true, isDeleted: false, createdAt: new Date()
-    },
-    {
-      _id: r2, name: 'Spice Garden',
-      description: 'South Indian flavours prepared with traditional recipes',
-      cuisine: ['South Indian'], owner: ownerId,
-      location: { address: '8 Matunga Circle', city: 'Mumbai', coordinates: { lat: 19.05, lng: 72.84 } },
-      openingHours: { open: '07:00', close: '22:00' },
-      averageRating: 4.2, deliveryTimeMinutes: 30, isOpen: true, isDeleted: false, createdAt: new Date()
-    },
-    {
-      _id: r3, name: 'Curry House',
-      description: 'Rich curries and biryanis from across India',
-      cuisine: ['North Indian', 'Mughlai'], owner: ownerId,
-      location: { address: '45 Marine Drive', city: 'Mumbai', coordinates: { lat: 18.94, lng: 72.82 } },
-      openingHours: { open: '11:00', close: '23:30' },
-      averageRating: 4.7, deliveryTimeMinutes: 35, isOpen: true, isDeleted: false, createdAt: new Date()
-    },
-    {
-      _id: r4, name: 'Punjabi Dhaba',
-      description: 'Hearty Punjabi home cooking with generous portions',
-      cuisine: ['North Indian', 'Punjabi'], owner: adminId,
-      location: { address: '99 BKC Road', city: 'Mumbai', coordinates: { lat: 19.06, lng: 72.87 } },
-      openingHours: { open: '08:00', close: '22:30' },
-      averageRating: 4.3, deliveryTimeMinutes: 40, isOpen: true, isDeleted: false, createdAt: new Date()
+      _id: r1, name: 'Bombay Lanes',
+      description: 'Authentic Indian cuisine with a modern twist, right in the heart of the city',
+      cuisine: ['North Indian', 'Street Food', 'Mughlai'], owner: ownerId,
+      location: { address: '12 Linking Road, Bandra', city: 'Mumbai', coordinates: { lat: 19.06, lng: 72.84 } },
+      openingHours: { open: '11:00', close: '23:00' },
+      averageRating: 4.6, deliveryTimeMinutes: 30, isOpen: true, isDeleted: false, createdAt: new Date()
     }
   );
 
   // Menu items
   const items = [
-    // Bombay Bites
-    { restaurant: r1, name: 'Vada Pav', description: "Mumbai's favourite street snack", category: 'Snacks', price: 30, isVegetarian: true },
-    { restaurant: r1, name: 'Pav Bhaji', description: 'Spiced mashed vegetables with buttered bun', category: 'Snacks', price: 90, isVegetarian: true },
-    { restaurant: r1, name: 'Bhel Puri', description: 'Puffed rice, sev, and tangy chutney', category: 'Snacks', price: 50, isVegetarian: true },
-    { restaurant: r1, name: 'Sev Puri', description: 'Crispy puris with spicy toppings', category: 'Snacks', price: 60, isVegetarian: true },
-    { restaurant: r1, name: 'Samosa Chole', description: 'Crispy samosa with spicy chickpea curry', category: 'Snacks', price: 70, isVegetarian: true },
-    { restaurant: r1, name: 'Masala Chai', description: 'Spiced Indian tea', category: 'Drinks', price: 25, isVegetarian: true },
-    // Spice Garden
-    { restaurant: r2, name: 'Masala Dosa', description: 'Crispy rice crêpe with spiced potato filling', category: 'Breakfast', price: 110, isVegetarian: true },
-    { restaurant: r2, name: 'Idli Sambar', description: 'Steamed rice cakes with lentil soup', category: 'Breakfast', price: 80, isVegetarian: true },
-    { restaurant: r2, name: 'Uttapam', description: 'Thick rice pancake with vegetables', category: 'Breakfast', price: 95, isVegetarian: true },
-    { restaurant: r2, name: 'Rasam', description: 'Tangy tomato and tamarind soup', category: 'Soups', price: 60, isVegetarian: true },
-    { restaurant: r2, name: 'Curd Rice', description: 'Cooked rice with yogurt and tempering', category: 'Mains', price: 90, isVegetarian: true },
-    // Curry House
-    { restaurant: r3, name: 'Chicken Biryani', description: 'Fragrant basmati rice with slow-cooked chicken', category: 'Mains', price: 280, isVegetarian: false },
-    { restaurant: r3, name: 'Paneer Butter Masala', description: 'Cottage cheese in rich tomato-butter sauce', category: 'Mains', price: 220, isVegetarian: true },
-    { restaurant: r3, name: 'Dal Makhani', description: 'Slow-cooked black lentils in cream', category: 'Mains', price: 180, isVegetarian: true },
-    { restaurant: r3, name: 'Garlic Naan', description: 'Soft leavened bread with garlic butter', category: 'Breads', price: 50, isVegetarian: true },
-    { restaurant: r3, name: 'Gulab Jamun', description: 'Soft milk-solid dumplings in sugar syrup', category: 'Desserts', price: 80, isVegetarian: true },
-    // Punjabi Dhaba
-    { restaurant: r4, name: 'Amritsari Kulcha', description: 'Stuffed bread from Amritsar', category: 'Breads', price: 120, isVegetarian: true },
-    { restaurant: r4, name: 'Sarson da Saag', description: 'Mustard greens with makki di roti', category: 'Mains', price: 160, isVegetarian: true },
-    { restaurant: r4, name: 'Butter Chicken', description: 'Tender chicken in creamy tomato sauce', category: 'Mains', price: 260, isVegetarian: false },
-    { restaurant: r4, name: 'Lassi', description: 'Sweet chilled yogurt drink', category: 'Drinks', price: 70, isVegetarian: true },
-    { restaurant: r4, name: 'Chhole Bhature', description: 'Spicy chickpeas with fried bread', category: 'Mains', price: 140, isVegetarian: true }
+    // Starters
+    { restaurant: r1, name: 'Chicken Tikka', description: 'Tender chicken marinated in spiced yogurt, grilled in tandoor', category: 'Starters', price: 280, isVegetarian: false },
+    { restaurant: r1, name: 'Paneer Tikka', description: 'Cottage cheese marinated in spiced yogurt, grilled in tandoor', category: 'Starters', price: 240, isVegetarian: true },
+    { restaurant: r1, name: 'Samosa (2 pcs)', description: 'Crispy pastry filled with spiced potatoes and peas', category: 'Starters', price: 80, isVegetarian: true },
+    { restaurant: r1, name: 'Onion Bhaji', description: 'Golden fried onion fritters with mint chutney', category: 'Starters', price: 120, isVegetarian: true },
+    { restaurant: r1, name: 'Seekh Kebab', description: 'Spiced minced lamb skewers grilled over charcoal', category: 'Starters', price: 320, isVegetarian: false },
+    { restaurant: r1, name: 'Aloo Chaat', description: "Mumbai-style spiced potato chaat with tamarind and chutneys", category: 'Starters', price: 100, isVegetarian: true },
+    // Mains
+    { restaurant: r1, name: 'Butter Chicken', description: 'Tender chicken in velvety tomato-cream sauce', category: 'Mains', price: 380, isVegetarian: false },
+    { restaurant: r1, name: 'Chicken Biryani', description: 'Fragrant basmati rice layered with slow-cooked spiced chicken', category: 'Mains', price: 420, isVegetarian: false },
+    { restaurant: r1, name: 'Lamb Rogan Josh', description: 'Slow-braised Kashmiri lamb in aromatic gravy', category: 'Mains', price: 440, isVegetarian: false },
+    { restaurant: r1, name: 'Paneer Butter Masala', description: 'Cottage cheese in rich tomato-butter sauce', category: 'Mains', price: 320, isVegetarian: true },
+    { restaurant: r1, name: 'Dal Makhani', description: 'Slow-cooked black lentils simmered overnight in cream and butter', category: 'Mains', price: 260, isVegetarian: true },
+    { restaurant: r1, name: 'Palak Paneer', description: 'Cottage cheese in smooth spiced spinach gravy', category: 'Mains', price: 300, isVegetarian: true },
+    { restaurant: r1, name: 'Chhole (Chickpea Curry)', description: 'Hearty spiced chickpeas in tangy tomato gravy', category: 'Mains', price: 240, isVegetarian: true },
+    { restaurant: r1, name: 'Prawn Masala', description: 'Juicy prawns in a rich coastal spice gravy', category: 'Mains', price: 480, isVegetarian: false },
+    // Rice & Breads
+    { restaurant: r1, name: 'Steamed Basmati Rice', description: 'Fragrant long-grain basmati rice', category: 'Rice & Breads', price: 80, isVegetarian: true },
+    { restaurant: r1, name: 'Garlic Naan', description: 'Soft leavened bread brushed with garlic butter', category: 'Rice & Breads', price: 60, isVegetarian: true },
+    { restaurant: r1, name: 'Butter Naan', description: 'Pillowy tandoor bread finished with butter', category: 'Rice & Breads', price: 50, isVegetarian: true },
+    { restaurant: r1, name: 'Laccha Paratha', description: 'Flaky layered whole-wheat bread', category: 'Rice & Breads', price: 55, isVegetarian: true },
+    { restaurant: r1, name: 'Vegetable Biryani', description: 'Fragrant basmati rice with seasonal vegetables and whole spices', category: 'Rice & Breads', price: 300, isVegetarian: true },
+    // Drinks
+    { restaurant: r1, name: 'Mango Lassi', description: 'Chilled blended yogurt drink with Alphonso mango', category: 'Drinks', price: 100, isVegetarian: true },
+    { restaurant: r1, name: 'Sweet Lassi', description: 'Classic chilled sweet yogurt drink', category: 'Drinks', price: 80, isVegetarian: true },
+    { restaurant: r1, name: 'Masala Chai', description: 'Freshly brewed spiced Indian tea', category: 'Drinks', price: 40, isVegetarian: true },
+    { restaurant: r1, name: 'Fresh Lime Soda', description: 'Lime juice with soda, sweet or salted', category: 'Drinks', price: 60, isVegetarian: true },
+    { restaurant: r1, name: 'Rose Sharbat', description: 'Chilled rose-flavoured milk drink', category: 'Drinks', price: 70, isVegetarian: true },
+    // Desserts
+    { restaurant: r1, name: 'Gulab Jamun', description: 'Soft milk-solid dumplings soaked in rose-cardamom syrup', category: 'Desserts', price: 120, isVegetarian: true },
+    { restaurant: r1, name: 'Rasmalai', description: 'Soft paneer discs in chilled saffron-cardamom cream', category: 'Desserts', price: 140, isVegetarian: true },
+    { restaurant: r1, name: 'Kulfi', description: 'Dense traditional Indian ice cream with pistachio and cardamom', category: 'Desserts', price: 100, isVegetarian: true }
   ];
 
   items.forEach((item) => {
