@@ -57,9 +57,9 @@
     </section>
   </main>
 
-  <!-- Floating cart button -->
+  // Floating cart button
   <a id="view-cart-btn" href="/pages/cart.html" class="floating-cart-btn" aria-label="View cart">
-    🛒 Cart <span id="cart-count-2" class="pill">0</span>
+    🛒 Cart <span data-cart-count class="pill">0</span>
   </a>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -67,14 +67,6 @@
   <script src="/js/cart.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>
-    BombayLane.restaurants.init();
-    // Keep second cart count in sync
-    setInterval(() => {
-      const count = BombayLane.cart.getItems().reduce((s, i) => s + i.quantity, 0);
-      const el = document.getElementById('cart-count-2');
-      if (el) el.textContent = count;
-    }, 500);
-  </script>
+  <script>BombayLane.restaurants.init();</script>
 </body>
 </html>

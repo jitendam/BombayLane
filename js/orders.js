@@ -158,12 +158,15 @@ BombayLane.orders = {
     const tracker = document.getElementById('order-status');
     if (!tracker) return;
 
+    const TERMINAL = new Set(['delivered', 'cancelled']);
+
     const poll = async () => {
       try {
         const result = await BombayLane.api.request(`/api/orders/${orderId}`);
-        tracker.textContent = STATUS_LABELS[result.order.status] || result.order.status;
-        if (result.order.status === 'delivered' || result.order.status === 'cancelled') return;
-      } catch { /* ignore */ }
+        const status = result.order.status;
+        tracker.textContent = STATUS_LABELS[status] || status;
+        if (TERMINAL.has(status)) return; // Stop polling at terminal state
+      } catch { /* ignore network errors — stop polling */ return; }
       setTimeout(poll, 10000);
     };
     poll();

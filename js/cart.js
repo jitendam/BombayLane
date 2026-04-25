@@ -85,7 +85,8 @@ BombayLane.cart = {
 
   updateCount() {
     const count = readCart().reduce((sum, item) => sum + item.quantity, 0);
-    document.querySelectorAll('#cart-count').forEach((el) => { el.textContent = count; });
+    // Update all cart count elements — both by id="cart-count" and data-cart-count attribute
+    document.querySelectorAll('#cart-count, [data-cart-count]').forEach((el) => { el.textContent = count; });
   },
 
   render(containerId = 'cart-items', summaryId = 'cart-summary') {
