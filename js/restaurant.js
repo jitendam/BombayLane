@@ -30,10 +30,13 @@ BombayLane.restaurants = {
         const statusClass = restaurant.isOpen ? 'status-open' : 'status-closed';
         const statusText = restaurant.isOpen ? 'Open' : 'Closed';
         const featuredBadge = restaurant.featured ? '<span class="featured-badge">★ Featured</span>' : '';
+        const imgSrc = restaurant.image
+          ? BombayLane.escapeAttr(restaurant.image)
+          : `https://picsum.photos/seed/${BombayLane.escapeAttr(restaurant._id)}/400/200`;
         return `
           <article class="card restaurant-card fade-in">
             ${featuredBadge}
-            <img src="https://picsum.photos/seed/${BombayLane.escapeAttr(restaurant._id)}/400/200" alt="${BombayLane.escapeAttr(restaurant.name)}" loading="lazy">
+            <img src="${imgSrc}" alt="${BombayLane.escapeAttr(restaurant.name)}" loading="lazy">
             <div class="restaurant-card-body">
               <h3>${BombayLane.escapeHtml(restaurant.name)}</h3>
               <p class="muted cuisine-tags">${cuisineList}</p>
@@ -78,6 +81,18 @@ BombayLane.restaurants = {
 
       document.title = `${r.name} | BombayLane`;
       document.getElementById('restaurant-name').textContent = r.name;
+
+      // Show restaurant hero image if available
+      const heroSection = document.querySelector('.restaurant-hero');
+      if (heroSection && r.image) {
+        const heroImg = document.createElement('img');
+        heroImg.src = r.image;
+        heroImg.alt = r.name;
+        heroImg.className = 'restaurant-hero-img';
+        heroImg.loading = 'eager';
+        heroSection.prepend(heroImg);
+      }
+
       document.getElementById('restaurant-meta').innerHTML = `
         <span class="muted">${BombayLane.escapeHtml(r.location?.city || '')}</span>
         &nbsp;•&nbsp;
@@ -105,22 +120,29 @@ BombayLane.restaurants = {
             <section class="menu-category">
               <h3 class="category-title">${BombayLane.escapeHtml(cat)}</h3>
               <ul class="list">
-                ${catItems.map((item) => `
-                  <li class="card menu-item-card row">
-                    <div class="menu-item-info">
-                      <span class="veg-dot ${item.isVegetarian ? 'veg' : 'non-veg'}" title="${item.isVegetarian ? 'Vegetarian' : 'Non-Vegetarian'}"></span>
-                      <div>
-                        <strong>${BombayLane.escapeHtml(item.name)}</strong>
-                        <p class="muted item-desc">${BombayLane.escapeHtml(item.description || '')}</p>
-                        <p class="item-price">₹${Number(item.price || 0)}</p>
+                ${catItems.map((item) => {
+                  const imgSrc = item.image
+                    ? BombayLane.escapeAttr(item.image)
+                    : `https://picsum.photos/seed/${BombayLane.escapeAttr(item._id)}/400/250`;
+                  return `
+                  <li class="card menu-item-card">
+                    <img src="${imgSrc}" alt="${BombayLane.escapeAttr(item.name)}" class="menu-item-img" loading="lazy">
+                    <div class="menu-item-body row">
+                      <div class="menu-item-info">
+                        <span class="veg-dot ${item.isVegetarian ? 'veg' : 'non-veg'}" title="${item.isVegetarian ? 'Vegetarian' : 'Non-Vegetarian'}"></span>
+                        <div>
+                          <strong>${BombayLane.escapeHtml(item.name)}</strong>
+                          <p class="muted item-desc">${BombayLane.escapeHtml(item.description || '')}</p>
+                          <p class="item-price">£${Number(item.price || 0).toFixed(2)}</p>
+                        </div>
                       </div>
+                      <button class="btn add-btn"
+                        onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)}, restaurantId: '${safeRestId}', restaurantName: '${safeRestName}' })">
+                        Add
+                      </button>
                     </div>
-                    <button class="btn add-btn"
-                      onclick="BombayLane.cart.add({ id: '${BombayLane.escapeAttr(item._id)}', name: '${BombayLane.escapeAttr(item.name)}', price: ${Number(item.price || 0)}, restaurantId: '${safeRestId}', restaurantName: '${safeRestName}' })">
-                      Add
-                    </button>
                   </li>
-                `).join('')}
+                `}).join('')}
               </ul>
             </section>
           `;

@@ -79,7 +79,7 @@ BombayLane.cart = {
   totals() {
     const subtotal = readCart().reduce((sum, item) => sum + item.price * item.quantity, 0);
     const tax = +(subtotal * 0.05).toFixed(2);
-    const deliveryFee = subtotal >= 500 || subtotal === 0 ? 0 : 40;
+    const deliveryFee = subtotal >= 15 || subtotal === 0 ? 0 : 2.99;
     return { subtotal, tax, deliveryFee, total: subtotal + tax + deliveryFee };
   },
 
@@ -113,7 +113,7 @@ BombayLane.cart = {
         return `<li class="card row">
           <div>
             <strong>${safeName}</strong>
-            <p class="muted">₹${safePrice} × ${safeQty} = ₹${(safePrice * safeQty).toFixed(0)}</p>
+            <p class="muted">£${safePrice.toFixed(2)} × ${safeQty} = £${(safePrice * safeQty).toFixed(2)}</p>
           </div>
           <div class="row">
             <button class="btn btn-secondary qty-btn" onclick="BombayLane.cart.updateQuantity('${safeId}', ${safeQty - 1})" aria-label="Decrease quantity">−</button>
@@ -128,11 +128,11 @@ BombayLane.cart = {
     if (summary) {
       const totals = this.totals();
       summary.innerHTML = `
-        <p class="row"><span>Subtotal</span><span>₹${totals.subtotal.toFixed(2)}</span></p>
-        <p class="row"><span>Tax (5%)</span><span>₹${totals.tax.toFixed(2)}</span></p>
-        <p class="row"><span>Delivery</span><span>${totals.deliveryFee === 0 ? 'Free' : '₹' + totals.deliveryFee.toFixed(2)}</span></p>
+        <p class="row"><span>Subtotal</span><span>£${totals.subtotal.toFixed(2)}</span></p>
+        <p class="row"><span>Tax (5%)</span><span>£${totals.tax.toFixed(2)}</span></p>
+        <p class="row"><span>Delivery</span><span>${totals.deliveryFee === 0 ? 'Free' : '£' + totals.deliveryFee.toFixed(2)}</span></p>
         <hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">
-        <p class="row"><strong>Total</strong><strong>₹${totals.total.toFixed(2)}</strong></p>`;
+        <p class="row"><strong>Total</strong><strong>£${totals.total.toFixed(2)}</strong></p>`;
     }
 
     this.updateCount();

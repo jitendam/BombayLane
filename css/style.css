@@ -120,7 +120,9 @@ body {
   padding-bottom: .4rem;
   margin-bottom: .75rem;
 }
-.menu-item-card { align-items: flex-start; }
+.menu-item-card { padding: 0; overflow: hidden; }
+.menu-item-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.menu-item-body { padding: .75rem; align-items: flex-start; gap: .5rem; }
 .menu-item-info { display: flex; gap: .75rem; align-items: flex-start; flex: 1; }
 .item-desc { font-size: .85rem; margin: .2rem 0; }
 .item-price { font-weight: 700; color: var(--brand); margin: .2rem 0; }
@@ -237,4 +239,9 @@ body {
 .toast.show { opacity: 1; transform: translateY(0); }
 
 /* Restaurant hero */
-.restaurant-hero { margin-bottom: 0; }
+.restaurant-hero { margin-bottom: 0; padding: 0; overflow: hidden; }
+.restaurant-hero-img { width: 100%; height: 260px; object-fit: cover; display: block; }
+.restaurant-hero h1,
+.restaurant-hero p { padding: 0 1.25rem; }
+.restaurant-hero h1 { margin-top: 1rem; }
+.restaurant-hero p:last-of-type { margin-bottom: 1rem; }
