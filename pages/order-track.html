@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
+  </header>
+
+  <main class="container-sm">
+    <div id="tracker-container">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Demo advance button (for demo presentations) -->
+    <div style="text-align:center;margin-top:2rem" id="demo-controls" class="hidden">
+      <p class="muted" style="font-size:.82rem">Demo Mode</p>
+      <button class="btn btn-outline btn-sm" id="demo-advance-btn">⏩ Advance Order Status</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/orders.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      const orderId = params.get('id');
+
+      if (orderId) {
+        BombayLane.orders.startTracking(orderId);
+
+        // Show demo advance button
+        const demoControls = document.getElementById('demo-controls');
+        const demoBtn = document.getElementById('demo-advance-btn');
+        if (demoControls) demoControls.classList.remove('hidden');
+
+        demoBtn?.addEventListener('click', async () => {
+          demoBtn.disabled = true;
+          demoBtn.textContent = 'Advancing…';
+          try {
+            await BombayLane.api.request(`/api/orders/${orderId}/demo-advance`, { method: 'POST' });
+            BombayLane.notify('Status advanced!');
+            BombayLane.orders.startTracking(orderId);
+          } catch (err) {
+            BombayLane.notify(err.message);
+          } finally {
+            setTimeout(() => {
+              demoBtn.disabled = false;
+              demoBtn.textContent = '⏩ Advance Order Status';
+            }, 1500);
+          }
+        });
+      } else {
+        BombayLane.orders.showNoOrder();
+      }
+    });
+  </script>
+</body>
+</html>

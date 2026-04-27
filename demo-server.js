@@ -529,6 +529,38 @@ app.get('/api/search', (req, res) => {
   res.json({ success: true, restaurants, menuItems });
 });
 
+// ── Demo advance endpoint (no auth, for demos) ────────────────────────────────
+const nextStatus = {
+  placed: 'confirmed', confirmed: 'preparing', preparing: 'out_for_delivery',
+  out_for_delivery: 'delivered', delivered: 'delivered', cancelled: 'cancelled'
+};
+
+app.post('/api/orders/:id/demo-advance', (req, res) => {
+  const order = db.orders.find((o) => o._id === req.params.id && !o.isDeleted);
+  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+  order.status = nextStatus[order.status] || order.status;
+  return res.json({ success: true, order });
+});
+
+// ── Admin all-orders endpoint ─────────────────────────────────────────────────
+app.get('/api/admin/orders', authenticate, authorize('admin', 'restaurant_owner'), (req, res) => {
+  const orders = db.orders
+    .filter((o) => !o.isDeleted)
+    .map((o) => {
+      const restaurant = db.restaurants.find((r) => r._id === o.restaurant);
+      const customer = db.users.find((u) => u._id === o.customer);
+      return {
+        ...o,
+        restaurantName: restaurant ? restaurant.name : '',
+        customerName: customer ? customer.name : '',
+        customerEmail: customer ? customer.email : '',
+        customerId: o.customer
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ success: true, orders });
+});
+
 // ── 404 handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ success: false, message: `Route not found: ${req.originalUrl}` }));
 

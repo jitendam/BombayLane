@@ -1,3 +1,58 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Orders</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
-<body><header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header><main class="container"><section class="card"><h1>Order Monitoring</h1><p class="muted">Track statuses, revenue, and SLA compliance.</p></section></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Orders | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/admin/index.html">Bombay<span>Lane</span> <span class="badge badge-admin" style="font-size:.7rem;vertical-align:middle">Admin</span></a>
+    <nav class="nav-links">
+      <a href="/index.html">← Public Site</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="admin-nav">
+      <a href="/admin/index.html">Dashboard</a>
+      <a href="/admin/orders.html" class="active">Orders</a>
+      <a href="/admin/users.html">Users</a>
+      <a href="/admin/restaurants.html">Restaurants</a>
+    </div>
+
+    <h1 class="page-title">Order Management</h1>
+
+    <div class="card" style="overflow:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Restaurant</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orders-table-body">
+          <tr><td colspan="7"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

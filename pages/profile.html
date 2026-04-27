@@ -3,22 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile | BombayLane</title>
+  <title>My Profile | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a><button id="theme-toggle" class="btn btn-secondary">Dark mode</button></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/profile.html" class="active">Profile</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
+  </header>
+
   <main class="container">
-    <section class="card">
-      <h1>My Profile</h1>
-      <pre id="profile-data" class="muted"></pre>
-    </section>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;align-items:start">
+      <!-- Profile card -->
+      <div style="display:grid;gap:1rem">
+        <div class="card" style="text-align:center">
+          <div class="profile-avatar" id="profile-avatar" style="margin:0 auto 1rem">U</div>
+          <h2 id="user-name-display" style="margin:0 0 .25rem;font-size:1.2rem"></h2>
+          <p id="user-email-display" class="muted" style="margin:0 0 .5rem;font-size:.9rem"></p>
+          <span id="user-role-badge" class="badge badge-customer">customer</span>
+        </div>
+
+        <div class="card">
+          <button class="btn btn-danger btn-full" id="logout-btn">🚪 Logout</button>
+        </div>
+      </div>
+
+      <!-- Edit form + orders -->
+      <div style="display:grid;gap:1.25rem">
+        <div class="card">
+          <h3 class="section-title">Edit Profile</h3>
+          <div class="form-grid">
+            <div>
+              <label class="label" for="profile-name">Full Name</label>
+              <input id="profile-name" class="input" type="text" placeholder="Your full name">
+            </div>
+            <div>
+              <label class="label" for="profile-phone">Phone Number</label>
+              <input id="profile-phone" class="input" type="tel" placeholder="+91 98765 43210">
+            </div>
+            <div>
+              <label class="label" for="profile-address">Delivery Address</label>
+              <textarea id="profile-address" class="input" rows="3" placeholder="Default delivery address"></textarea>
+            </div>
+            <div>
+              <button class="btn" id="save-profile-btn">Save Profile</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Recent Orders</h3>
+          <div id="recent-orders"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/profile.js"></script>
   <script src="/js/main.js"></script>
-  <script>
-    const user = JSON.parse(localStorage.getItem('bl_user') || '{}');
-    document.getElementById('profile-data').textContent = JSON.stringify(user, null, 2) || 'No user logged in';
-  </script>
 </body>
 </html>

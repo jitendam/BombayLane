@@ -3,27 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant Detail | BombayLane</title>
+  <title>Menu | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
   </header>
+
   <main class="container">
-    <section class="card">
-      <h1 id="restaurant-name">Restaurant</h1>
-      <p id="restaurant-meta" class="muted">Loading...</p>
-    </section>
-    <ul id="menu-list" class="list"></ul>
+    <!-- Back link -->
+    <a href="/pages/restaurants.html" class="btn btn-secondary btn-sm" style="margin-bottom:1rem">← Back to Restaurants</a>
+
+    <!-- Restaurant header -->
+    <div class="detail-header">
+      <h1 id="restaurant-name">Loading…</h1>
+      <div id="restaurant-meta"></div>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="category-tabs" id="category-tabs" role="tablist" aria-label="Menu categories"></div>
+
+    <!-- Two-column layout: menu + sticky cart -->
+    <div class="menu-layout">
+      <div class="menu-col">
+        <div id="menu-list"></div>
+      </div>
+      <aside>
+        <div class="cart-panel" id="sticky-cart-panel">
+          <h3 class="section-title">Your Order</h3>
+          <p class="muted" style="text-align:center;padding:1rem 0">No items yet</p>
+        </div>
+      </aside>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => BombayLane.restaurants.init());
+  </script>
 </body>
 </html>

@@ -4,28 +4,128 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
+  </header>
+
   <main class="container">
-    <section class="card">
-      <h1>Checkout</h1>
-      <p class="muted">Payment integration prepared for Stripe.</p>
-      <div class="form-grid">
-        <div><label class="label" for="restaurant-id">Restaurant ID</label><input id="restaurant-id" class="input" placeholder="Enter restaurant ID"></div>
-        <div><label class="label" for="delivery-address">Delivery Address</label><textarea id="delivery-address" class="input" rows="3" placeholder="Enter your address"></textarea></div>
-        <button class="btn" onclick="BombayLane.orders.placeOrder()">Place Order</button>
+    <h1 class="page-title">Checkout</h1>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start">
+      <!-- Left: address + payment -->
+      <div style="display:grid;gap:1.25rem">
+        <!-- Order from -->
+        <div class="card">
+          <h3 class="section-title">Ordering From</h3>
+          <p id="checkout-restaurant" class="muted">Loading cart…</p>
+        </div>
+
+        <!-- Delivery address -->
+        <div class="card">
+          <h3 class="section-title">Delivery Address</h3>
+          <div class="form-grid">
+            <div>
+              <label class="label" for="delivery-address">Full Address</label>
+              <textarea id="delivery-address" class="input" rows="3" placeholder="Enter your delivery address" required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="card">
+          <h3 class="section-title">Payment Method</h3>
+          <label class="payment-option selected" id="cod-option">
+            <input type="radio" name="payment" value="cod" checked>
+            <span>💵 Cash on Delivery</span>
+            <span class="muted" style="margin-left:auto;font-size:.82rem">Pay when delivered</span>
+          </label>
+          <div class="alert alert-info" style="margin-top:.75rem">
+            <span>ℹ️</span> This is a demo. Only Cash on Delivery is available.
+          </div>
+        </div>
       </div>
-      <div id="cart-summary" class="card" style="margin-top:1rem"></div>
-    </section>
+
+      <!-- Right: order summary -->
+      <aside>
+        <div class="order-summary" style="position:sticky;top:80px">
+          <h3 class="section-title" style="margin-bottom:1rem">Order Summary</h3>
+          <div id="checkout-items" style="margin-bottom:.75rem"></div>
+          <hr class="divider">
+          <div id="cart-summary"></div>
+          <button class="btn btn-full btn-lg" style="margin-top:1.25rem" id="place-order-btn">
+            🛒 Place Order
+          </button>
+          <p class="muted" style="text-align:center;font-size:.8rem;margin-top:.75rem">
+            By placing your order you agree to our terms of service
+          </p>
+        </div>
+      </aside>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.cart.render('cart-items','cart-summary');</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('bl_user') || 'null');
+      if (!user) {
+        BombayLane.notify('Please log in to checkout');
+        setTimeout(() => { window.location.href = '/pages/auth.html'; }, 800);
+        return;
+      }
+
+      // Show restaurant
+      const restaurantName = BombayLane.cart.getRestaurantName();
+      document.getElementById('checkout-restaurant').textContent = restaurantName || 'Unknown Restaurant';
+
+      // Pre-fill address
+      const addrEl = document.getElementById('delivery-address');
+      if (user.address && addrEl) addrEl.value = user.address;
+
+      // Show cart items in summary
+      const itemsEl = document.getElementById('checkout-items');
+      const items = BombayLane.cart.getItems();
+      if (items.length && itemsEl) {
+        itemsEl.innerHTML = items.map((i) =>
+          `<div class="summary-row" style="font-size:.9rem">
+            <span>${BombayLane.escapeHtml(i.name)} ×${i.quantity}</span>
+            <span>₹${(i.price * i.quantity).toFixed(2)}</span>
+          </div>`
+        ).join('');
+      } else if (itemsEl) {
+        itemsEl.innerHTML = '<p class="muted">Cart is empty. <a href="/pages/restaurants.html">Add items</a></p>';
+      }
+
+      // Render totals
+      BombayLane.cart.render('___noop___', 'cart-summary');
+
+      // Place order
+      document.getElementById('place-order-btn')?.addEventListener('click', () => {
+        BombayLane.orders.placeOrder();
+      });
+    });
+  </script>
 </body>
 </html>

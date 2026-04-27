@@ -3,28 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders | BombayLane</title>
+  <title>My Orders | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html" class="active">My Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
+  </header>
+
   <main class="container">
-    <section class="card">
-      <h1>Order History</h1>
-      <ul id="orders-list" class="list"></ul>
-    </section>
-    <section class="card">
-      <h2>Live order tracking</h2>
-      <p>Current status: <strong id="order-status">-</strong></p>
-      <button class="btn" onclick="BombayLane.orders.startTracking(prompt('Order ID to track:'))">Track Order</button>
-    </section>
+    <h1 class="page-title">Order History</h1>
+
+    <div class="card" style="overflow:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Restaurant</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orders-list">
+          <tr><td colspan="6"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/orders.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.orders.loadHistory();</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => BombayLane.orders.loadHistory());
+  </script>
 </body>
 </html>

@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BombayLane | Food Delivery</title>
+  <title>BombayLane | Mumbai's Favourite Food Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/animations.css">
@@ -11,44 +14,166 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links" aria-label="Primary">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
       <a href="/pages/restaurants.html">Restaurants</a>
-      <a href="/pages/orders.html">Orders</a>
+      <a href="/pages/orders.html">My Orders</a>
       <a href="/pages/profile.html">Profile</a>
-      <a href="/pages/cart.html" aria-label="Shopping cart">Cart <span id="cart-count" class="pill">0</span></a>
+      <a href="/pages/cart.html" aria-label="Cart">🛒 <span class="pill cart-count">0</span></a>
     </nav>
+    <div id="nav-auth-area"></div>
   </header>
 
-  <main class="container">
-    <section class="hero card fade-in">
-      <h1>Order authentic meals in minutes</h1>
-      <p>Search restaurants, add favorites to cart, and track every step from kitchen to doorstep.</p>
-      <div class="actions">
-        <a class="btn" href="/pages/restaurants.html">Start Ordering</a>
-        <a class="btn btn-secondary" href="/pages/auth.html">Login / Register</a>
-      </div>
-    </section>
+  <main>
+    <div class="container">
+      <!-- Hero -->
+      <section class="hero fade-in">
+        <h1>Mumbai's Favourite<br>Food Delivery 🍛</h1>
+        <p>Hot meals from top restaurants — delivered to your door in 30 minutes</p>
+        <div class="hero-search">
+          <input type="search" id="hero-search" placeholder="Search for restaurants or dishes…" aria-label="Search restaurants">
+          <a class="btn" href="/pages/restaurants.html" id="hero-search-btn">Search</a>
+        </div>
+      </section>
 
-    <section class="grid cols-3" aria-label="Quick actions">
-      <article class="card">
-        <h2>Explore Restaurants</h2>
-        <p>Filter by cuisine, ratings, and delivery time.</p>
-      </article>
-      <article class="card">
-        <h2>Live Tracking</h2>
-        <p>Follow order status in real time from placed to delivered.</p>
-      </article>
-      <article class="card">
-        <h2>Secure Checkout</h2>
-        <p>Validated checkout flow with taxes and delivery fee calculation.</p>
-      </article>
-    </section>
+      <!-- Categories -->
+      <section aria-label="Browse by category">
+        <div class="section-header">
+          <h2>Order by Category</h2>
+        </div>
+        <div class="categories-grid">
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=Street+Food">
+            <span class="cat-icon">🥙</span>
+            <span>Street Food</span>
+          </a>
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=North+Indian">
+            <span class="cat-icon">🍛</span>
+            <span>Mains</span>
+          </a>
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=Biryani">
+            <span class="cat-icon">🍚</span>
+            <span>Biryani</span>
+          </a>
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=South+Indian">
+            <span class="cat-icon">🫓</span>
+            <span>South Indian</span>
+          </a>
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=Desserts">
+            <span class="cat-icon">🍮</span>
+            <span>Desserts</span>
+          </a>
+          <a class="category-tile" href="/pages/restaurants.html?cuisine=Drinks">
+            <span class="cat-icon">🥤</span>
+            <span>Drinks</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Featured Restaurants -->
+      <section aria-label="Featured restaurants">
+        <div class="section-header">
+          <h2>Featured Restaurants</h2>
+          <a href="/pages/restaurants.html">See all →</a>
+        </div>
+        <div class="grid cols-4" id="featured-restaurants">
+          <div class="spinner"></div>
+        </div>
+      </section>
+
+      <!-- Why BombayLane -->
+      <section aria-label="Why choose BombayLane" style="margin-top:2.5rem">
+        <div class="section-header">
+          <h2>Why BombayLane?</h2>
+        </div>
+        <div class="grid cols-3">
+          <div class="why-card fade-in">
+            <div class="why-icon">⚡</div>
+            <h3>Lightning Fast</h3>
+            <p>Average delivery in under 35 minutes. Real-time tracking keeps you informed every step of the way.</p>
+          </div>
+          <div class="why-card fade-in">
+            <div class="why-icon">🌿</div>
+            <h3>Fresh & Authentic</h3>
+            <p>Partnered with Mumbai's best restaurants serving fresh, authentic recipes made with quality ingredients.</p>
+          </div>
+          <div class="why-card fade-in">
+            <div class="why-icon">💳</div>
+            <h3>Easy Payment</h3>
+            <p>Simple checkout with Cash on Delivery. No hidden charges — what you see is what you pay.</p>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong> — Mumbai's Favourite Food Delivery &nbsp;·&nbsp; <a href="/pages/restaurants.html">Restaurants</a> &nbsp;·&nbsp; <a href="/pages/orders.html">Orders</a> &nbsp;·&nbsp; <a href="/pages/auth.html">Login</a></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Hero search redirect
+      const heroSearch = document.getElementById('hero-search');
+      heroSearch?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          window.location.href = `/pages/restaurants.html?q=${encodeURIComponent(heroSearch.value.trim())}`;
+        }
+      });
+      document.getElementById('hero-search-btn')?.addEventListener('click', () => {
+        window.location.href = `/pages/restaurants.html?q=${encodeURIComponent(heroSearch?.value?.trim() || '')}`;
+      });
+
+      // Pre-fill cuisine from URL if any
+      const params = new URLSearchParams(location.search);
+      if (params.get('cuisine') && heroSearch) heroSearch.value = params.get('cuisine');
+
+      // Load featured restaurants
+      try {
+        const result = await BombayLane.api.request('/api/restaurants');
+        const restaurants = (result.restaurants || []).slice(0, 4);
+        const container = document.getElementById('featured-restaurants');
+        if (container) {
+          container.innerHTML = restaurants.map((r) => {
+            const id = BombayLane.escapeAttr(r._id);
+            const name = BombayLane.escapeHtml(r.name);
+            const city = BombayLane.escapeHtml(r.location?.city || 'Mumbai');
+            const rating = Number(r.averageRating || 0).toFixed(1);
+            const time = r.deliveryTimeMinutes || 30;
+            const cuisines = (r.cuisine || []).map((c) => `<span class="tag">${BombayLane.escapeHtml(c)}</span>`).join('');
+            const openBadge = r.isOpen
+              ? '<span class="badge badge-open">● Open</span>'
+              : '<span class="badge badge-closed">● Closed</span>';
+            return `
+              <article class="restaurant-card fade-in">
+                <img src="https://picsum.photos/seed/${id}/400/200" alt="${name}" loading="lazy">
+                <div class="card-body">
+                  <div class="row" style="align-items:flex-start;gap:.5rem">
+                    <h3 style="margin:0">${name}</h3>
+                    ${openBadge}
+                  </div>
+                  <p class="muted" style="margin:.25rem 0">${city}</p>
+                  <div class="card-tags">${cuisines}</div>
+                  <div class="card-meta">
+                    <span class="rating">★ ${rating}</span>
+                    <span class="delivery-badge">🕐 ${time} min</span>
+                  </div>
+                  <div class="card-footer">
+                    <a class="btn" href="/pages/restaurant-detail.html?id=${id}">Order Now</a>
+                  </div>
+                </div>
+              </article>`;
+          }).join('');
+        }
+      } catch (e) {
+        document.getElementById('featured-restaurants').innerHTML = '<p class="muted">Could not load restaurants.</p>';
+      }
+    });
+  </script>
 </body>
 </html>

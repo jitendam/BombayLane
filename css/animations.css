@@ -1,6 +1,46 @@
 @keyframes spin { to { transform: rotate(360deg); } }
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.fade-in { animation: fadeIn .3s ease; }
+.fade-in { animation: fadeIn .3s ease both; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in { animation: slideIn .3s ease both; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(217,72,15,.2); }
+  50% { box-shadow: 0 0 0 8px rgba(217,72,15,.08); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface2) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.bounce-in { animation: bounceIn .4s ease both; }
+
+@keyframes trackerProgress {
+  from { width: 0; }
+}
+.tracker-progress { animation: trackerProgress .8s ease both; }
+
+@keyframes checkmark {
+  from { stroke-dashoffset: 50; }
+  to { stroke-dashoffset: 0; }
+}

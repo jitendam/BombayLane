@@ -4,16 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane Admin</a></header>
+  <header class="topbar">
+    <a class="brand" href="/admin/index.html">Bombay<span>Lane</span> <span class="badge badge-admin" style="font-size:.7rem;vertical-align:middle">Admin</span></a>
+    <nav class="nav-links">
+      <a href="/index.html">← Public Site</a>
+    </nav>
+  </header>
+
   <main class="container">
-    <nav class="nav-links"><a href="/admin/restaurants.html">Restaurants</a><a href="/admin/orders.html">Orders</a><a href="/admin/users.html">Users</a></nav>
-    <section id="admin-stats" class="grid cols-3"></section>
+    <div class="admin-nav">
+      <a href="/admin/index.html" class="active">Dashboard</a>
+      <a href="/admin/orders.html">Orders</a>
+      <a href="/admin/users.html">Users</a>
+      <a href="/admin/restaurants.html">Restaurants</a>
+    </div>
+
+    <h1 class="page-title">Dashboard</h1>
+
+    <section id="admin-stats" class="grid cols-3" style="margin-bottom:2rem">
+      <div class="spinner"></div>
+    </section>
+
+    <div class="grid cols-3">
+      <a href="/admin/orders.html" class="card" style="text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:2rem;margin-bottom:.5rem">📦</div>
+        <h3 style="margin:0 0 .25rem">Manage Orders</h3>
+        <p class="muted" style="margin:0;font-size:.9rem">View and update order statuses</p>
+      </a>
+      <a href="/admin/users.html" class="card" style="text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:2rem;margin-bottom:.5rem">👥</div>
+        <h3 style="margin:0 0 .25rem">Manage Users</h3>
+        <p class="muted" style="margin:0;font-size:.9rem">View customer and owner accounts</p>
+      </a>
+      <a href="/admin/restaurants.html" class="card" style="text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:2rem;margin-bottom:.5rem">🍴</div>
+        <h3 style="margin:0 0 .25rem">Restaurants</h3>
+        <p class="muted" style="margin:0;font-size:.9rem">View restaurant listings</p>
+      </a>
+    </div>
   </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

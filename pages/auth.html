@@ -3,39 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth | BombayLane</title>
+  <title>Login / Register | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/index.html">BombayLane</a></header>
-  <main class="container grid cols-3" style="grid-template-columns:1fr 1fr;">
-    <section class="card">
-      <h1>Login</h1>
-      <form id="login-form" class="form-grid" novalidate>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <button class="btn" type="submit">Login</button>
-      </form>
-    </section>
-    <section class="card">
-      <h1>Register</h1>
-      <form id="register-form" class="form-grid" novalidate>
-        <input class="input" type="text" name="name" placeholder="Name" minlength="2" required>
-        <input class="input" type="email" name="email" placeholder="Email" required>
-        <input class="input" type="password" name="password" placeholder="Password" required>
-        <select name="role"><option value="customer">Customer</option><option value="restaurant_owner">Restaurant Owner</option></select>
-        <input class="input" type="text" name="phone" placeholder="Phone">
-        <textarea class="input" name="address" placeholder="Address"></textarea>
-        <button class="btn" type="submit">Create account</button>
-      </form>
-      <button id="logout-btn" class="btn btn-secondary" style="margin-top:1rem">Logout</button>
-    </section>
+  <header class="topbar">
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+  </header>
+
+  <main class="container-sm" style="padding-top:2rem">
+    <!-- Demo credentials callout -->
+    <div class="demo-callout" style="margin-bottom:1.5rem">
+      <p style="margin:0 0 .5rem;font-weight:600">🎉 Demo Credentials</p>
+      <p style="margin:0;font-size:.9rem">
+        Email: <strong>user@bombaylane.com</strong> &nbsp;·&nbsp; Password: <strong>Demo@1234</strong><br>
+        Admin: <strong>admin@bombaylane.com</strong> &nbsp;·&nbsp; Password: <strong>Demo@1234</strong>
+      </p>
+    </div>
+
+    <div class="card fade-in">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login">Login</button>
+        <button class="auth-tab" id="tab-register">Register</button>
+      </div>
+
+      <!-- Login panel -->
+      <div id="panel-login">
+        <form id="login-form" class="form-grid" novalidate>
+          <div>
+            <label class="label" for="login-email">Email</label>
+            <input id="login-email" class="input" type="email" name="email" placeholder="you@email.com" required>
+          </div>
+          <div>
+            <label class="label" for="login-password">Password</label>
+            <input id="login-password" class="input" type="password" name="password" placeholder="••••••••" required>
+          </div>
+          <button class="btn btn-full btn-lg" type="submit">Login →</button>
+        </form>
+      </div>
+
+      <!-- Register panel -->
+      <div id="panel-register" class="hidden">
+        <form id="register-form" class="form-grid" novalidate>
+          <div>
+            <label class="label" for="reg-name">Full Name</label>
+            <input id="reg-name" class="input" type="text" name="name" placeholder="Your name" minlength="2" required>
+          </div>
+          <div>
+            <label class="label" for="reg-email">Email</label>
+            <input id="reg-email" class="input" type="email" name="email" placeholder="you@email.com" required>
+          </div>
+          <div>
+            <label class="label" for="reg-password">Password</label>
+            <input id="reg-password" class="input" type="password" name="password" placeholder="Min 8 chars, upper+lower+number+symbol" required>
+          </div>
+          <div>
+            <label class="label" for="reg-role">Account Type</label>
+            <select id="reg-role" class="input" name="role">
+              <option value="customer">Customer</option>
+              <option value="restaurant_owner">Restaurant Owner</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="label" for="reg-phone">Phone (optional)</label>
+              <input id="reg-phone" class="input" type="tel" name="phone" placeholder="+91 9876543210">
+            </div>
+            <div>
+              <label class="label" for="reg-address">Address (optional)</label>
+              <input id="reg-address" class="input" type="text" name="address" placeholder="City, Mumbai">
+            </div>
+          </div>
+          <button class="btn btn-full btn-lg" type="submit">Create Account →</button>
+        </form>
+      </div>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.auth.init();</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Redirect if already logged in
+      if (localStorage.getItem('bl_token')) {
+        window.location.href = '/index.html';
+        return;
+      }
+      BombayLane.auth.init();
+    });
+  </script>
 </body>
 </html>

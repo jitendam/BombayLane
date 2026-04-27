@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Restaurants | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/animations.css">
@@ -11,27 +14,72 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/cart.html">Cart <span id="cart-count" class="pill">0</span></a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html" class="active">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
   </header>
+
   <main class="container">
-    <section class="card form-grid">
-      <h1>Find restaurants</h1>
-      <input id="search-input" class="input" type="search" placeholder="Search by name, cuisine, or city">
-      <select id="cuisine-filter">
-        <option value="">All cuisines</option>
-        <option value="North Indian">North Indian</option>
-        <option value="South Indian">South Indian</option>
-        <option value="Street Food">Street Food</option>
-      </select>
-    </section>
-    <section id="restaurant-list" class="grid cols-3" aria-live="polite"></section>
+    <h1 class="page-title">Find Restaurants</h1>
+
+    <!-- Filters -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div style="display:grid;grid-template-columns:1fr 180px 180px;gap:1rem;align-items:end">
+        <div>
+          <label class="label" for="search-input">Search</label>
+          <input id="search-input" class="input" type="search" placeholder="Restaurant name, cuisine, city…">
+        </div>
+        <div>
+          <label class="label" for="cuisine-filter">Cuisine</label>
+          <select id="cuisine-filter" class="input">
+            <option value="">All Cuisines</option>
+            <option value="Street Food">Street Food</option>
+            <option value="North Indian">North Indian</option>
+            <option value="South Indian">South Indian</option>
+            <option value="Mughlai">Mughlai</option>
+            <option value="Punjabi">Punjabi</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="sort-filter">Sort By</label>
+          <select id="sort-filter" class="input">
+            <option value="rating">Top Rated</option>
+            <option value="delivery">Fastest Delivery</option>
+            <option value="popularity">Most Popular</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restaurant Grid -->
+    <section id="restaurant-list" class="grid cols-4" aria-live="polite"></section>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/restaurant.js"></script>
   <script src="/js/main.js"></script>
-  <script>BombayLane.restaurants.init();</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Apply URL params
+      const params = new URLSearchParams(location.search);
+      const q = params.get('q');
+      const cuisine = params.get('cuisine');
+      if (q) document.getElementById('search-input').value = q;
+      if (cuisine) document.getElementById('cuisine-filter').value = cuisine;
+      BombayLane.restaurants.init();
+    });
+  </script>
 </body>
 </html>

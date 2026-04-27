@@ -1,3 +1,56 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Users</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/components.css"></head>
-<body><header class="topbar"><a class="brand" href="/admin/index.html">Admin</a></header><main class="container"><section class="card"><h1>User Management</h1><p class="muted">Manage customer and owner accounts.</p></section></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Users | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/admin/index.html">Bombay<span>Lane</span> <span class="badge badge-admin" style="font-size:.7rem;vertical-align:middle">Admin</span></a>
+    <nav class="nav-links">
+      <a href="/index.html">← Public Site</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="admin-nav">
+      <a href="/admin/index.html">Dashboard</a>
+      <a href="/admin/orders.html">Orders</a>
+      <a href="/admin/users.html" class="active">Users</a>
+      <a href="/admin/restaurants.html">Restaurants</a>
+    </div>
+
+    <h1 class="page-title">User Management</h1>
+
+    <div class="card" style="overflow:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr><td colspan="5"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,10 +1,61 @@
-@media (max-width: 900px) {
-  .grid.cols-3 { grid-template-columns: 1fr 1fr; }
+/* ── Responsive Breakpoints ── */
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  .menu-layout { grid-template-columns: 1fr; }
+  .cart-panel { position: static; }
+  .categories-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* Tablet portrait */
+@media (max-width: 900px) {
+  .grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+  .form-row { grid-template-columns: 1fr; }
+}
+
+/* Mobile */
 @media (max-width: 640px) {
-  .topbar { flex-direction: column; align-items: flex-start; gap: .6rem; }
-  .grid.cols-3 { grid-template-columns: 1fr; }
-  .container { padding: .75rem; }
-  .btn { width: 100%; }
+  body { font-size: 14px; }
+
+  .topbar { padding: 0 .75rem; height: auto; min-height: 56px; flex-wrap: wrap; gap: .4rem; padding-top: .5rem; padding-bottom: .5rem; }
+  .brand { font-size: 1.2rem; }
+  .nav-links { gap: .1rem; }
+  .nav-links a { padding: .3rem .5rem; font-size: .82rem; }
+
+  .container, .container-sm { padding: 1rem .75rem; }
+
+  .hero { padding: 2rem 1.25rem; border-radius: var(--radius); }
+  .hero h1 { font-size: 1.5rem; }
+  .hero p { font-size: .95rem; }
+  .hero .hero-search { flex-direction: column; padding: .75rem; gap: .5rem; border-radius: var(--radius); }
+  .hero .hero-search input { width: 100%; }
+  .hero .hero-search .btn { width: 100%; }
+
+  .categories-grid { grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+  .category-tile { padding: .9rem .5rem; font-size: .78rem; }
+  .category-tile .cat-icon { font-size: 1.5rem; }
+
+  .grid.cols-3, .grid.cols-2, .grid.cols-4 { grid-template-columns: 1fr; }
+
+  .btn { padding: .55rem 1.1rem; }
+  .btn-full, .btn-lg { width: 100%; }
+
+  .tracker-bar { flex-direction: row; overflow-x: auto; padding-bottom: 1rem; }
+  .step-label { font-size: .68rem; max-width: 60px; }
+  .step-circle { width: 34px; height: 34px; font-size: .9rem; }
+
+  .section-header { flex-direction: column; align-items: flex-start; gap: .4rem; }
+
+  .data-table { font-size: .82rem; }
+  .data-table th, .data-table td { padding: .5rem .6rem; }
+
+  .menu-item-img { width: 70px; height: 70px; }
+}
+
+/* Small mobile */
+@media (max-width: 400px) {
+  .categories-grid { grid-template-columns: repeat(2, 1fr); }
+  .tracker-bar::before { display: none; }
+  .tracker-progress { display: none; }
 }

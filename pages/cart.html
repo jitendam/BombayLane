@@ -4,25 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cart | BombayLane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/index.html">BombayLane</a>
-    <nav class="nav-links"><a href="/pages/checkout.html">Checkout</a></nav>
+    <a class="brand" href="/index.html">Bombay<span>Lane</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/pages/restaurants.html">Restaurants</a>
+      <a href="/pages/orders.html">My Orders</a>
+      <a href="/pages/profile.html">Profile</a>
+      <a href="/pages/cart.html" class="active">🛒 <span class="pill cart-count">0</span></a>
+    </nav>
+    <div id="nav-auth-area"></div>
   </header>
-  <main class="container grid" style="grid-template-columns:2fr 1fr;">
-    <section>
-      <h1>Your Cart</h1>
-      <ul id="cart-items" class="list"></ul>
-      <button class="btn btn-secondary" onclick="BombayLane.cart.clear(); BombayLane.cart.render();">Clear cart</button>
-    </section>
-    <aside class="card" id="cart-summary"></aside>
+
+  <main class="container">
+    <h1 class="page-title">Your Cart</h1>
+
+    <p class="restaurant-name-header hidden" id="cart-restaurant-name"></p>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start">
+      <!-- Cart items -->
+      <div>
+        <div id="cart-items"></div>
+        <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap" id="cart-actions">
+          <button class="btn btn-secondary btn-sm" id="clear-cart-btn">🗑 Clear Cart</button>
+          <a class="btn btn-outline btn-sm" href="/pages/restaurants.html">+ Add More Items</a>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <aside>
+        <div class="order-summary" style="position:sticky;top:80px">
+          <h3 class="section-title" style="margin-bottom:1rem">Order Summary</h3>
+          <div id="cart-summary"></div>
+          <a class="btn btn-full btn-lg" href="/pages/checkout.html" style="margin-top:1.25rem" id="checkout-btn">
+            Proceed to Checkout →
+          </a>
+        </div>
+      </aside>
+    </div>
   </main>
+
+  <footer>
+    <p>© 2025 <strong>BombayLane</strong></p>
+  </footer>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/js/utils.js"></script>
   <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      BombayLane.cart.render('cart-items', 'cart-summary');
+      document.getElementById('clear-cart-btn')?.addEventListener('click', () => {
+        if (confirm('Clear all items from your cart?')) {
+          BombayLane.cart.clear();
+          BombayLane.cart.render('cart-items', 'cart-summary');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
