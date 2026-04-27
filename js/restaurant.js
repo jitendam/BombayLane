@@ -180,7 +180,7 @@ BombayLane.restaurants = {
                 </div>
                 <p>${desc}</p>
                 <span class="menu-item-price">₹${Number(item.price || 0)}</span>
-                <div class="qty-controls" id="qty-${itemId}" data-id="${itemId}" data-name="${name}" data-price="${Number(item.price || 0)}" data-rid="${BombayLane.escapeAttr(restaurantId)}" data-rname="${BombayLane.escapeHtml(restaurantName)}">
+                <div class="qty-controls" id="qty-${itemId}" data-id="${itemId}" data-name="${name}" data-price="${Number(item.price || 0)}" data-rid="${BombayLane.escapeAttr(restaurantId)}" data-rname="${BombayLane.escapeAttr(restaurantName)}">
                   <button class="btn btn-sm" data-add="${itemId}">+ Add</button>
                 </div>
               </div>

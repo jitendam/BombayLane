@@ -185,7 +185,7 @@ BombayLane.orders = {
     ).join('');
 
     container.innerHTML = `
-      <div class="tracker-card fade-in">
+      <div class="tracker-card fade-in" role="status" aria-live="polite" aria-label="Order status: ${BombayLane.escapeAttr(STATUS_LABELS[status] || status)}">
         <div class="row" style="margin-bottom:1.5rem">
           <div>
             <p class="muted" style="margin:0;font-size:.85rem">Order #${BombayLane.escapeHtml(order._id.slice(-6).toUpperCase())}</p>

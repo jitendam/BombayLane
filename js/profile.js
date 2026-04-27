@@ -71,7 +71,8 @@ BombayLane.profile = {
       const currentUser = this.getUser() || {};
       localStorage.setItem('bl_user', JSON.stringify({ ...currentUser, ...result.user }));
       BombayLane.notify('Profile updated ✅');
-      document.getElementById('user-name-display').textContent = result.user.name || '';
+      const nameEl = document.getElementById('user-name-display');
+      if (nameEl) nameEl.textContent = result.user.name || '';
     } catch (error) {
       BombayLane.notify(error.message);
     } finally {

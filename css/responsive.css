@@ -18,7 +18,13 @@
 @media (max-width: 640px) {
   body { font-size: 14px; }
 
-  .topbar { padding: 0 .75rem; height: auto; min-height: 56px; flex-wrap: wrap; gap: .4rem; padding-top: .5rem; padding-bottom: .5rem; }
+  .topbar {
+    padding: .5rem .75rem;
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: .4rem;
+  }
   .brand { font-size: 1.2rem; }
   .nav-links { gap: .1rem; }
   .nav-links a { padding: .3rem .5rem; font-size: .82rem; }
@@ -28,9 +34,13 @@
   .hero { padding: 2rem 1.25rem; border-radius: var(--radius); }
   .hero h1 { font-size: 1.5rem; }
   .hero p { font-size: .95rem; }
-  .hero .hero-search { flex-direction: column; padding: .75rem; gap: .5rem; border-radius: var(--radius); }
-  .hero .hero-search input { width: 100%; }
-  .hero .hero-search .btn { width: 100%; }
+  .hero .hero-search {
+    flex-direction: column;
+    padding: .75rem;
+    gap: .5rem;
+    border-radius: var(--radius);
+  }
+  .hero .hero-search input, .hero .hero-search .btn { width: 100%; }
 
   .categories-grid { grid-template-columns: repeat(3, 1fr); gap: .6rem; }
   .category-tile { padding: .9rem .5rem; font-size: .78rem; }
@@ -41,7 +51,7 @@
   .btn { padding: .55rem 1.1rem; }
   .btn-full, .btn-lg { width: 100%; }
 
-  .tracker-bar { flex-direction: row; overflow-x: auto; padding-bottom: 1rem; }
+  .tracker-bar { overflow-x: auto; padding-bottom: 1rem; }
   .step-label { font-size: .68rem; max-width: 60px; }
   .step-circle { width: 34px; height: 34px; font-size: .9rem; }
 
@@ -56,6 +66,5 @@
 /* Small mobile */
 @media (max-width: 400px) {
   .categories-grid { grid-template-columns: repeat(2, 1fr); }
-  .tracker-bar::before { display: none; }
-  .tracker-progress { display: none; }
+  .tracker-bar::before, .tracker-progress { display: none; }
 }
