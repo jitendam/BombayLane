@@ -86,9 +86,9 @@ BombayLane.cart = {
   },
 
   render(containerId = 'cart-items', summaryId = 'cart-summary') {
-    const list = document.getElementById(containerId);
+    const list = containerId ? document.getElementById(containerId) : null;
     const summary = document.getElementById(summaryId);
-    if (!list) return;
+    if (!list && !summary) return;
 
     const cart = readCart();
 
@@ -99,44 +99,46 @@ BombayLane.cart = {
       restaurantHeader.classList.remove('hidden');
     }
 
-    list.innerHTML = cart.items.length
-      ? cart.items.map((item) => {
-        const safeId = BombayLane.escapeAttr(item.id);
-        const safeName = BombayLane.escapeHtml(item.name);
-        const price = Number(item.price || 0);
-        const qty = Number(item.quantity || 1);
-        return `
-          <div class="cart-item fade-in">
-            <div class="cart-item-info">
-              <h4>${safeName}</h4>
-              <span class="cart-item-price">₹${price} × ${qty} = ₹${(price * qty).toFixed(2)}</span>
-            </div>
-            <div class="qty-controls">
-              <button class="qty-btn" aria-label="Decrease quantity" data-action="dec" data-id="${safeId}" data-qty="${qty}">−</button>
-              <span class="qty-display">${qty}</span>
-              <button class="qty-btn" aria-label="Increase quantity" data-action="inc" data-id="${safeId}" data-qty="${qty}">+</button>
-              <button class="btn btn-icon btn-secondary btn-sm" aria-label="Remove" data-action="remove" data-id="${safeId}">🗑</button>
-            </div>
-          </div>`;
-      }).join('')
-      : `<div class="empty-state">
-           <div class="icon">🛒</div>
-           <h3>Your cart is empty</h3>
-           <p>Browse our restaurants and add items</p>
-           <a class="btn" href="/pages/restaurants.html">Explore Restaurants</a>
-         </div>`;
+    if (list) {
+      list.innerHTML = cart.items.length
+        ? cart.items.map((item) => {
+          const safeId = BombayLane.escapeAttr(item.id);
+          const safeName = BombayLane.escapeHtml(item.name);
+          const price = Number(item.price || 0);
+          const qty = Number(item.quantity || 1);
+          return `
+            <div class="cart-item fade-in">
+              <div class="cart-item-info">
+                <h4>${safeName}</h4>
+                <span class="cart-item-price">₹${price} × ${qty} = ₹${(price * qty).toFixed(2)}</span>
+              </div>
+              <div class="qty-controls">
+                <button class="qty-btn" aria-label="Decrease quantity" data-action="dec" data-id="${safeId}" data-qty="${qty}">−</button>
+                <span class="qty-display">${qty}</span>
+                <button class="qty-btn" aria-label="Increase quantity" data-action="inc" data-id="${safeId}" data-qty="${qty}">+</button>
+                <button class="btn btn-icon btn-secondary btn-sm" aria-label="Remove" data-action="remove" data-id="${safeId}">🗑</button>
+              </div>
+            </div>`;
+        }).join('')
+        : `<div class="empty-state">
+             <div class="icon">🛒</div>
+             <h3>Your cart is empty</h3>
+             <p>Browse our restaurants and add items</p>
+             <a class="btn" href="/pages/restaurants.html">Explore Restaurants</a>
+           </div>`;
 
-    // Attach delegated events
-    list.querySelectorAll('[data-action]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const qty = parseInt(btn.dataset.qty, 10);
-        if (btn.dataset.action === 'inc') this.updateQuantity(id, qty + 1);
-        else if (btn.dataset.action === 'dec') this.updateQuantity(id, qty - 1);
-        else if (btn.dataset.action === 'remove') this.remove(id);
-        this.render(containerId, summaryId);
+      // Attach delegated events
+      list.querySelectorAll('[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const qty = parseInt(btn.dataset.qty, 10);
+          if (btn.dataset.action === 'inc') this.updateQuantity(id, qty + 1);
+          else if (btn.dataset.action === 'dec') this.updateQuantity(id, qty - 1);
+          else if (btn.dataset.action === 'remove') this.remove(id);
+          this.render(containerId, summaryId);
+        });
       });
-    });
+    }
 
     if (summary) {
       const t = this.totals();

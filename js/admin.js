@@ -109,8 +109,7 @@ BombayLane.admin = {
     container.innerHTML = '<tr><td colspan="5"><div class="spinner"></div></td></tr>';
 
     try {
-      // Use search endpoint to get all restaurants then derive users from our local data
-      // Admin endpoint — uses the all-orders route to get user data
+      // Derive unique customers from the admin orders endpoint which returns customer info
       const result = await BombayLane.api.request('/api/admin/orders');
       // Extract unique customers
       const seen = new Set();

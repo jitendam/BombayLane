@@ -158,8 +158,10 @@ BombayLane.orders = {
 
     const status = order.status || 'placed';
     const isCancelled = status === 'cancelled';
+    // Progress bar stops at 80% so the final dot is visually centred over the bar end
+    const MAX_PROGRESS_PCT = 80;
     const stepIdx = STATUS_STEPS.indexOf(status);
-    const progressPct = stepIdx >= 0 ? (stepIdx / (STATUS_STEPS.length - 1)) * 80 : 0;
+    const progressPct = stepIdx >= 0 ? (stepIdx / (STATUS_STEPS.length - 1)) * MAX_PROGRESS_PCT : 0;
 
     const restaurantName = typeof order.restaurant === 'object'
       ? BombayLane.escapeHtml(order.restaurant?.name || '')
